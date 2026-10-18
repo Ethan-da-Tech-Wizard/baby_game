@@ -1,14 +1,25 @@
-const CACHE_NAME = 'baby-game-v1';
+const CACHE_NAME = 'baby-game-v2';
 const ASSETS = [
   './',
   'index.html',
+  'studio.html',
   'styles.css',
   'audio.js',
   'anime.js',
   'effects.js',
   'keys.js',
   'manifest.json',
-  'icon.svg'
+  'icon.svg',
+  'images/pokemon/pikachu.png',
+  'images/pokemon/charizard.png',
+  'images/pokemon/blastoise.png',
+  'images/pokemon/venusaur.png',
+  'images/pokemon/kangaskhan.png',
+  'images/pokemon/nidoking.png',
+  'images/pokemon/aerodactyl.png',
+  'images/pokemon/togepi.png',
+  'images/pokemon/zigzagoon.png',
+  'images/pokemon/starly.png'
 ];
 
 self.addEventListener('install', (e) => {

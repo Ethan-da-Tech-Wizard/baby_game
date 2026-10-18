@@ -135,9 +135,17 @@ body.shake-quake {
   transform: translate(-50%, -50%) scale(0.2);
 }
 
+#splash-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 3vw, 36px);
+  margin-bottom: 12px;
+}
+
 #splash-letter {
   font-family: 'Fredoka', 'Nunito', 'Segoe UI', Arial, sans-serif;
-  font-size: clamp(7.5rem, 22vw, 18rem);
+  font-size: clamp(6.5rem, 18vw, 15rem);
   font-weight: 900;
   color: #ffffff;
   -webkit-text-stroke: 8px #1e1b4b;
@@ -147,13 +155,44 @@ body.shake-quake {
   animation: bounceScale 0.4s ease-out;
 }
 
+#splash-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(90px, 16vw, 190px);
+  height: clamp(90px, 16vw, 190px);
+}
+
+#splash-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 25px rgba(0,0,0,0.7));
+  animation: bounceScale 0.4s ease-out;
+}
+
+#splash-img.hidden {
+  display: none;
+}
+
+#splash-emoji {
+  font-size: clamp(4.5rem, 12vw, 9.5rem);
+  line-height: 1;
+  filter: drop-shadow(0 10px 25px rgba(0,0,0,0.7));
+  animation: bounceScale 0.4s ease-out;
+}
+
+#splash-emoji.hidden {
+  display: none;
+}
+
 #splash-word {
   font-family: 'Fredoka', 'Nunito', 'Segoe UI', Arial, sans-serif;
-  font-size: clamp(2.2rem, 5.5vw, 4.8rem);
+  font-size: clamp(2rem, 5vw, 4.2rem);
   font-weight: 900;
   color: #ffec3d;
-  background: rgba(15, 23, 42, 0.85);
-  padding: 10px 36px;
+  background: rgba(15, 23, 42, 0.88);
+  padding: 10px 38px;
   border-radius: 50px;
   border: 5px solid #ffffff;
   box-shadow: 0 10px 35px rgba(0,0,0,0.7);

@@ -99,19 +99,36 @@ class EffectsEngine {
     }, isViolent ? 600 : 300);
   }
 
-  showSplashBanner(letter, word) {
+  showSplashBanner(letter, word, imgUrl = null, emoji = null) {
     const banner = document.getElementById('splash-banner');
     const letterEl = document.getElementById('splash-letter');
     const wordEl = document.getElementById('splash-word');
+    const imgEl = document.getElementById('splash-img');
+    const emojiEl = document.getElementById('splash-emoji');
 
     letterEl.innerText = letter;
     wordEl.innerText = word;
+
+    if (imgUrl) {
+      imgEl.src = imgUrl;
+      imgEl.classList.remove('hidden');
+      if (emojiEl) emojiEl.classList.add('hidden');
+    } else if (emoji) {
+      if (emojiEl) {
+        emojiEl.innerText = emoji;
+        emojiEl.classList.remove('hidden');
+      }
+      imgEl.classList.add('hidden');
+    } else {
+      imgEl.classList.add('hidden');
+      if (emojiEl) emojiEl.classList.add('hidden');
+    }
 
     banner.classList.remove('hidden');
     clearTimeout(this.bannerTimer);
     this.bannerTimer = setTimeout(() => {
       banner.classList.add('hidden');
-    }, 2200);
+    }, 2400);
   }
 
   // 1. Confetti Cannon Blast

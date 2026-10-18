@@ -413,17 +413,12 @@ class PokemonTroupeManager {
   }
 
   render(ctx, width, height) {
+    if (this.intensity === 0) return;
+
     this.time += 0.08;
     const groundY = height * 0.76;
     const bounceBeat = Math.abs(Math.sin(this.time * 3.5));
     const sideWiggle = Math.sin(this.time * 3.5);
-
-    // If a specific Pokémon was summoned by keypress, highlight them center-stage!
-    if (this.activeSummon) {
-      this.renderSpecificPokemon(ctx, this.activeSummon, width * 0.5, groundY, bounceBeat, sideWiggle);
-    }
-
-    if (this.intensity === 0) return;
 
     // SQUAD 1: Kanto Heavyweights (Pikachu, Charizard, Blastoise, Venusaur)
     if (this.intensity === 1 || this.intensity === 4) {

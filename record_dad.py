@@ -136,23 +136,32 @@ def interactive_mode():
         has_rec = key in manifest
         status_icon = "🟢" if has_rec else "⚪"
 
-        print(f"\n[{i}/{total}] {status_icon} Key: {item['title']}")
-        print(f"   👉 Suggested Script: \"{item['prompt']}\"")
+        while True:
+            print(f"\n[{i}/{total}] {status_icon} Key: {item['title']}")
+            print(f"   👉 Suggested Script: \"{item['prompt']}\"")
 
-        choice = input("   Press [ENTER] to record (2.5s), [s] to skip, [p] to play existing, [q] to quit: ").strip().lower()
-        if choice == 'q':
-            print("\n👋 Voice studio session ended. Your recordings are saved!")
-            break
-        elif choice == 's':
-            continue
-        elif choice == 'p':
+            choice = input("   Press [ENTER] to record (2.5s), [s] to skip, [p] to play existing, [q] to quit: ").strip().lower()
+            if choice == 'q':
+                print("\n👋 Voice studio session ended. Your recordings are saved!")
+                return
+            elif choice == 's':
+                break
+            elif choice == 'p':
+                play_clip(key)
+                continue
+
+            print(f"   🔴 RECORDING NOW... SPEAK: \"{item['prompt']}\"")
+            record_clip(key, duration=2.5)
+            print("   ⏹️ Done! Playing it back to you...")
             play_clip(key)
-            continue
 
-        print(f"   🔴 RECORDING NOW... SPEAK: \"{item['prompt']}\"")
-        record_clip(key, duration=2.5)
-        print("   ⏹️ Done! Playing it back to you...")
-        play_clip(key)
+            review = input("   👉 Keep this clip? [ENTER to keep & next, 'r' to REDO right now]: ").strip().lower()
+            if review == 'r':
+                print("   🔁 Redoing this clip...")
+                continue
+            else:
+                status_icon = "🟢"
+                break
 
     print("\n🎉 Manifest updated at audio/dad/manifest.json!")
     print("Commit & push or run locally to test on the Chromebook!")
@@ -162,9 +171,23 @@ def main():
     parser.add_argument("--key", help="Record a specific key (e.g. KeyA, KeyB, Space)")
     parser.add_argument("--play", help="Play existing recording for a key")
     parser.add_argument("--list", action="store_true", help="List all recordings status")
+    parser.add_argument("--clear", action="store_true", help="Clear all recordings to start completely fresh")
     args = parser.parse_args()
 
     ensure_dirs()
+
+    if args.clear:
+        confirm = input("⚠️ Are you sure you want to delete all recordings and start fresh? [y/N]: ").strip().lower()
+        if confirm == 'y':
+            for f in os.listdir(OUTPUT_DIR):
+                if f.endswith(".wav"):
+                    try:
+                        os.remove(os.path.join(OUTPUT_DIR, f))
+                    except Exception:
+                        pass
+            save_manifest({})
+            print("✨ All recordings cleared! Clean slate ready.")
+        return
 
     if args.list:
         manifest = load_manifest()
