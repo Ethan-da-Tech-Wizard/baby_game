@@ -13,48 +13,156 @@
   // Track key press state for smooth hold/repeat prevention
   const activeKeys = new Set();
 
-  // Vocabulary Map for Toddler Learning (A-Z) with Featured Pokémon & Toddler Favorites
+  // Track cycling states for each key (cycles 3 fun items per key!)
+  const cycleState = {};
+
+  // 3-Item Cycling Vocabulary Map for Toddler Learning (A-Z)
+  // Each press cycles to a new fun object, official Pokémon, animal, or vehicle!
   const vocabMap = {
-    KeyA: { letter: 'A', word: 'AERODACTYL 🦖', sound: () => audio.playLaser(), fx: () => { pokemon.summon('aerodactyl'); effects.spawnLaserBeam(); } },
-    KeyB: { letter: 'B', word: 'BLASTOISE 🐢', sound: () => audio.playDuckQuack(), fx: () => { pokemon.summon('blastoise'); effects.cycleRainStorm(); } },
-    KeyC: { letter: 'C', word: 'CHARIZARD 🔥', sound: () => audio.playLionRoar(), fx: () => { pokemon.summon('charizard'); effects.spawnFireworks(); } },
-    KeyD: { letter: 'D', word: 'DOG 🐶', sound: () => audio.playDogBark(), fx: () => effects.spawnFireworks() },
-    KeyE: { letter: 'E', word: 'ELEPHANT 🐘', sound: () => audio.playElephantTrumpet(), fx: () => effects.spawnLightningBolt() },
-    KeyF: { letter: 'F', word: 'FROG 🐸', sound: () => audio.playFrogRibbit(), fx: () => effects.spawnFireworks() },
-    KeyG: { letter: 'G', word: 'GALAXY 🌌', sound: () => audio.playChimeFanfare(), fx: () => effects.cycleGalaxyWarp() },
-    KeyH: { letter: 'H', word: 'HEART ❤️', sound: () => audio.playChimeFanfare(), fx: () => effects.toggleFloatingHearts() },
-    KeyI: { letter: 'I', word: 'ICE CREAM 🍦', sound: () => audio.playSlideWhistle(), fx: () => effects.spawnCandyRain(20) },
-    KeyJ: { letter: 'J', word: 'TOGEPI 🐣', sound: () => audio.playChimeFanfare(), fx: () => { pokemon.summon('togepi'); effects.spawnConfetti(200); } },
-    KeyK: { letter: 'K', word: 'KANGASKHAN 🦘', sound: () => audio.playDinoRoar(), fx: () => { pokemon.summon('kangaskhan'); effects.spawnEmojiBurst(20); } },
-    KeyL: { letter: 'L', word: 'LION 🦁', sound: () => audio.playLionRoar(), fx: () => effects.spawnEmojiBurst(20) },
-    KeyM: { letter: 'M', word: 'MONKEY 🐵', sound: () => audio.playSlideWhistle(), fx: () => effects.spawnConfetti(150) },
-    KeyN: { letter: 'N', word: 'NIDOKING 👑', sound: () => audio.playDinoRoar(), fx: () => { pokemon.summon('nidoking'); effects.triggerScreenShake(false); } },
-    KeyO: { letter: 'O', word: 'OWL 🦉', sound: () => audio.playOwlHoot(), fx: () => effects.spawnBubble() },
-    KeyP: { letter: 'P', word: 'POKÉMON PARTY 🐹', sound: () => audio.playLevelUp(), fx: () => togglePokemonDance() },
-    KeyQ: { letter: 'Q', word: 'QUEEN 👑', sound: () => audio.playChimeFanfare(), fx: () => effects.spawnFireworks() },
-    KeyR: { letter: 'R', word: 'RAINBOW 🌈', sound: () => audio.playChimeFanfare(), fx: () => effects.toggleRainbow() },
-    KeyS: { letter: 'S', word: 'STARLY 🐦', sound: () => audio.playBirdChirp(), fx: () => { pokemon.summon('starly'); effects.spawnBubble(); } },
-    KeyT: { letter: 'T', word: 'BABY SHARK 🦈', sound: () => {}, fx: () => toggleSharkSong() },
-    KeyU: { letter: 'U', word: 'UNICORN 🦄', sound: () => audio.playChimeFanfare(), fx: () => effects.spawnEmojiBurst(25) },
-    KeyV: { letter: 'V', word: 'VENUSAUR 🌺', sound: () => audio.playLevelUp(), fx: () => { pokemon.summon('venusaur'); effects.spawnConfetti(300); } },
-    KeyW: { letter: 'W', word: 'WATER 🌊', sound: () => audio.playDuckQuack(), fx: () => effects.cycleRainStorm() },
-    KeyX: { letter: 'X', word: 'XYLOPHONE 🎵', sound: () => audio.playChimeFanfare(), fx: () => effects.toggleCRTScanlines() },
-    KeyY: { letter: 'Y', word: 'YUMMY 🍩', sound: () => audio.playPartyHorn(), fx: () => effects.spawnCandyRain(25) },
-    KeyZ: { letter: 'Z', word: 'ZIGZAGOON 🦝', sound: () => audio.playDogBark(), fx: () => { pokemon.summon('zigzagoon'); effects.spawnBouncingBall(); } }
+    KeyA: [
+      { letter: 'A', word: 'APPLE 🍎', emoji: '🍎', img: null, sound: () => audio.playBoing(), fx: () => effects.spawnBouncingBall() },
+      { letter: 'A', word: 'AERODACTYL 🦖', emoji: null, img: 'images/pokemon/aerodactyl.png', sound: () => audio.playLaser(), fx: () => effects.spawnLaserBeam() },
+      { letter: 'A', word: 'ASTRONAUT 👨‍🚀', emoji: '🚀', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.cycleGalaxyWarp() }
+    ],
+    KeyB: [
+      { letter: 'B', word: 'BALL ⚽', emoji: '⚽', img: null, sound: () => audio.playBoing(), fx: () => effects.spawnBouncingBall() },
+      { letter: 'B', word: 'BLASTOISE 🐢', emoji: null, img: 'images/pokemon/blastoise.png', sound: () => audio.playDuckQuack(), fx: () => effects.cycleRainStorm() },
+      { letter: 'B', word: 'BUTTERFLY 🦋', emoji: '🦋', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.spawnConfetti(250) }
+    ],
+    KeyC: [
+      { letter: 'C', word: 'CAT 🐱', emoji: '🐱', img: null, sound: () => audio.playCatMeow(), fx: () => effects.spawnEmojiBurst(20) },
+      { letter: 'C', word: 'CHARIZARD 🔥', emoji: null, img: 'images/pokemon/charizard.png', sound: () => audio.playLionRoar(), fx: () => effects.spawnFireworks() },
+      { letter: 'C', word: 'CAR 🚗', emoji: '🚗', img: null, sound: () => audio.playPartyHorn(), fx: () => effects.spawnCandyRain(20) }
+    ],
+    KeyD: [
+      { letter: 'D', word: 'DOG 🐶', emoji: '🐶', img: null, sound: () => audio.playDogBark(), fx: () => effects.spawnEmojiBurst(20) },
+      { letter: 'D', word: 'DINOSAUR 🦕', emoji: '🦕', img: null, sound: () => audio.playDinoRoar(), fx: () => effects.triggerScreenShake(true) },
+      { letter: 'D', word: 'DRUM 🥁', emoji: '🥁', img: null, sound: () => audio.playDrumKit(), fx: () => effects.spawnFireworks() }
+    ],
+    KeyE: [
+      { letter: 'E', word: 'ELEPHANT 🐘', emoji: '🐘', img: null, sound: () => audio.playElephantTrumpet(), fx: () => effects.spawnBouncingBall() },
+      { letter: 'E', word: 'ELECTRICITY ⚡', emoji: '⚡', img: null, sound: () => audio.playLaser(), fx: () => effects.spawnLightningBolt() },
+      { letter: 'E', word: 'EARTH 🌍', emoji: '🌍', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.cycleGalaxyWarp() }
+    ],
+    KeyF: [
+      { letter: 'F', word: 'FROG 🐸', emoji: '🐸', img: null, sound: () => audio.playFrogRibbit(), fx: () => effects.spawnBouncingBall() },
+      { letter: 'F', word: 'FIREWORKS 🎆', emoji: '🎆', img: null, sound: () => audio.playBoom(), fx: () => effects.spawnFireworks() },
+      { letter: 'F', word: 'FIRE TRUCK 🚒', emoji: '🚒', img: null, sound: () => audio.playPartyHorn(), fx: () => effects.spawnConfetti(200) }
+    ],
+    KeyG: [
+      { letter: 'G', word: 'GALAXY 🌌', emoji: '🌌', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.cycleGalaxyWarp() },
+      { letter: 'G', word: 'GIRAFFE 🦒', emoji: '🦒', img: null, sound: () => audio.playBoing(), fx: () => effects.spawnEmojiBurst(20) },
+      { letter: 'G', word: 'GUITAR 🎸', emoji: '🎸', img: null, sound: () => audio.playLevelUp(), fx: () => effects.spawnLaserBeam() }
+    ],
+    KeyH: [
+      { letter: 'H', word: 'HEART ❤️', emoji: '❤️', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.toggleFloatingHearts() },
+      { letter: 'H', word: 'HORSE 🐴', emoji: '🐴', img: null, sound: () => audio.playDogBark(), fx: () => effects.spawnConfetti(200) },
+      { letter: 'H', word: 'HELICOPTER 🚁', emoji: '🚁', img: null, sound: () => audio.playLaser(), fx: () => effects.spawnLaserBeam() }
+    ],
+    KeyI: [
+      { letter: 'I', word: 'ICE CREAM 🍦', emoji: '🍦', img: null, sound: () => audio.playSlideWhistle(), fx: () => effects.spawnCandyRain(25) },
+      { letter: 'I', word: 'IGLOO ❄️', emoji: '❄️', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.toggleCRTScanlines() },
+      { letter: 'I', word: 'ISLAND 🏝️', emoji: '🏝️', img: null, sound: () => audio.playDuckQuack(), fx: () => effects.cycleRainStorm() }
+    ],
+    KeyJ: [
+      { letter: 'J', word: 'TOGEPI 🐣', emoji: null, img: 'images/pokemon/togepi.png', sound: () => audio.playChimeFanfare(), fx: () => effects.spawnConfetti(250) },
+      { letter: 'J', word: 'JUMP 🦘', emoji: '🦘', img: null, sound: () => audio.playBoing(), fx: () => effects.spawnBouncingBall() },
+      { letter: 'J', word: 'JUICE 🧃', emoji: '🧃', img: null, sound: () => audio.playSlideWhistle(), fx: () => effects.spawnBubble() }
+    ],
+    KeyK: [
+      { letter: 'K', word: 'KANGASKHAN 🦘', emoji: null, img: 'images/pokemon/kangaskhan.png', sound: () => audio.playDinoRoar(), fx: () => effects.spawnConfetti(300) },
+      { letter: 'K', word: 'KITE 🪁', emoji: '🪁', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.toggleRainbow() },
+      { letter: 'K', word: 'KOALA 🐨', emoji: '🐨', img: null, sound: () => audio.playBoing(), fx: () => effects.spawnBubble() }
+    ],
+    KeyL: [
+      { letter: 'L', word: 'LION 🦁', emoji: '🦁', img: null, sound: () => audio.playLionRoar(), fx: () => effects.spawnFireworks() },
+      { letter: 'L', word: 'LIGHTNING ⚡', emoji: '⚡', img: null, sound: () => audio.playLaser(), fx: () => effects.spawnLightningBolt() },
+      { letter: 'L', word: 'LOLLIPOP 🍭', emoji: '🍭', img: null, sound: () => audio.playPartyHorn(), fx: () => effects.spawnCandyRain(30) }
+    ],
+    KeyM: [
+      { letter: 'M', word: 'MONKEY 🐵', emoji: '🐵', img: null, sound: () => audio.playSlideWhistle(), fx: () => effects.spawnEmojiBurst(25) },
+      { letter: 'M', word: 'MOON 🌙', emoji: '🌙', img: null, sound: () => audio.playOwlHoot(), fx: () => effects.cycleGalaxyWarp() },
+      { letter: 'M', word: 'MUSIC 🎵', emoji: '🎵', img: null, sound: () => audio.playLevelUp(), fx: () => effects.toggleDiscoStrobe() }
+    ],
+    KeyN: [
+      { letter: 'N', word: 'NIDOKING 👑', emoji: null, img: 'images/pokemon/nidoking.png', sound: () => audio.playDinoRoar(), fx: () => effects.triggerScreenShake(true) },
+      { letter: 'N', word: 'NINJA 🥷', emoji: '🥷', img: null, sound: () => audio.playSaiyanAuraSound(), fx: () => { anime.setTheme('naruto'); updateThemeBadge(); } },
+      { letter: 'N', word: 'NEST 🪺', emoji: '🪺', img: null, sound: () => audio.playBirdChirp(), fx: () => effects.spawnBubble() }
+    ],
+    KeyO: [
+      { letter: 'O', word: 'OWL 🦉', emoji: '🦉', img: null, sound: () => audio.playOwlHoot(), fx: () => effects.spawnBubble() },
+      { letter: 'O', word: 'OCTOPUS 🐙', emoji: '🐙', img: null, sound: () => audio.playDuckQuack(), fx: () => effects.cycleRainStorm() },
+      { letter: 'O', word: 'ORANGE 🍊', emoji: '🍊', img: null, sound: () => audio.playBoing(), fx: () => effects.spawnBouncingBall() }
+    ],
+    KeyP: [
+      { letter: 'P', word: 'PIKACHU ⚡', emoji: null, img: 'images/pokemon/pikachu.png', sound: () => audio.playLevelUp(), fx: () => effects.spawnLightningBolt() },
+      { letter: 'P', word: 'PUPPY 🐶', emoji: '🐶', img: null, sound: () => audio.playDogBark(), fx: () => effects.spawnEmojiBurst(20) },
+      { letter: 'P', word: 'POKÉMON DANCE 🐹', emoji: null, img: 'images/pokemon/pikachu_ani.gif', sound: () => audio.playLevelUp(), fx: () => togglePokemonDance() }
+    ],
+    KeyQ: [
+      { letter: 'Q', word: 'QUEEN 👑', emoji: '👑', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.spawnFireworks() },
+      { letter: 'Q', word: 'QUACK 🦆', emoji: '🦆', img: null, sound: () => audio.playDuckQuack(), fx: () => effects.spawnBubble() },
+      { letter: 'Q', word: 'QUIET 🤫', emoji: '🤫', img: null, sound: () => audio.playOwlHoot(), fx: () => effects.toggleFloatingHearts() }
+    ],
+    KeyR: [
+      { letter: 'R', word: 'RAINBOW 🌈', emoji: '🌈', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.toggleRainbow() },
+      { letter: 'R', word: 'ROCKET 🚀', emoji: '🚀', img: null, sound: () => audio.playLaser(), fx: () => effects.spawnFireworks() },
+      { letter: 'R', word: 'ROBOT 🤖', emoji: '🤖', img: null, sound: () => audio.playLevelUp(), fx: () => effects.cycleMatrixRain() }
+    ],
+    KeyS: [
+      { letter: 'S', word: 'STARLY 🐦', emoji: null, img: 'images/pokemon/starly.png', sound: () => audio.playBirdChirp(), fx: () => effects.spawnBubble() },
+      { letter: 'S', word: 'SUN ☀️', emoji: '☀️', img: null, sound: () => audio.playRooster(), fx: () => effects.triggerFlash() },
+      { letter: 'S', word: 'SUPER SAIYAN ⚡', emoji: '⚡', img: null, sound: () => audio.playSaiyanAuraSound(), fx: () => { anime.setTheme('dbz'); updateThemeBadge(); } }
+    ],
+    KeyT: [
+      { letter: 'T', word: 'BABY SHARK 🦈', emoji: '🦈', img: null, sound: () => {}, fx: () => toggleSharkSong() },
+      { letter: 'T', word: 'TRAIN 🚂', emoji: '🚂', img: null, sound: () => audio.playPartyHorn(), fx: () => effects.spawnConfetti(250) },
+      { letter: 'T', word: 'TURTLE 🐢', emoji: '🐢', img: null, sound: () => audio.playDuckQuack(), fx: () => effects.spawnBubble() }
+    ],
+    KeyU: [
+      { letter: 'U', word: 'UNICORN 🦄', emoji: '🦄', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.spawnConfetti(300) },
+      { letter: 'U', word: 'UMBRELLA ☂️', emoji: '☂️', img: null, sound: () => audio.playDuckQuack(), fx: () => effects.cycleRainStorm() },
+      { letter: 'U', word: 'UFO 🛸', emoji: '🛸', img: null, sound: () => audio.playLaser(), fx: () => effects.cycleGalaxyWarp() }
+    ],
+    KeyV: [
+      { letter: 'V', word: 'VENUSAUR 🌺', emoji: null, img: 'images/pokemon/venusaur.png', sound: () => audio.playLevelUp(), fx: () => effects.spawnConfetti(300) },
+      { letter: 'V', word: 'VICTORY 🏆', emoji: '🏆', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.spawnFireworks() },
+      { letter: 'V', word: 'VOLCANO 🌋', emoji: '🌋', img: null, sound: () => audio.playBoom(), fx: () => effects.spawnCandyRain(25) }
+    ],
+    KeyW: [
+      { letter: 'W', word: 'WATER 🌊', emoji: '🌊', img: null, sound: () => audio.playDuckQuack(), fx: () => effects.cycleRainStorm() },
+      { letter: 'W', word: 'WHALE 🐳', emoji: '🐳', img: null, sound: () => audio.playOwlHoot(), fx: () => effects.spawnBubble() },
+      { letter: 'W', word: 'WIND 💨', emoji: '💨', img: null, sound: () => audio.playSlideWhistle(), fx: () => effects.spawnConfetti(200) }
+    ],
+    KeyX: [
+      { letter: 'X', word: 'XYLOPHONE 🎵', emoji: '🎵', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.toggleCRTScanlines() },
+      { letter: 'X', word: 'X-RAY 🩻', emoji: '🩻', img: null, sound: () => audio.playLaser(), fx: () => effects.toggleInvertColors() },
+      { letter: 'X', word: 'TREASURE ❌', emoji: '🏴‍☠️', img: null, sound: () => audio.playLevelUp(), fx: () => effects.spawnFireworks() }
+    ],
+    KeyY: [
+      { letter: 'Y', word: 'YUMMY DONUT 🍩', emoji: '🍩', img: null, sound: () => audio.playPartyHorn(), fx: () => effects.spawnCandyRain(35) },
+      { letter: 'Y', word: 'YOYO 🪀', emoji: '🪀', img: null, sound: () => audio.playBoing(), fx: () => effects.spawnBouncingBall() },
+      { letter: 'Y', word: 'YACHT ⛵', emoji: '⛵', img: null, sound: () => audio.playDuckQuack(), fx: () => effects.cycleRainStorm() }
+    ],
+    KeyZ: [
+      { letter: 'Z', word: 'ZIGZAGOON 🦝', emoji: null, img: 'images/pokemon/zigzagoon.png', sound: () => audio.playDogBark(), fx: () => effects.spawnBouncingBall() },
+      { letter: 'Z', word: 'ZEBRA 🦓', emoji: '🦓', img: null, sound: () => audio.playSlideWhistle(), fx: () => effects.spawnEmojiBurst(20) },
+      { letter: 'Z', word: 'ZAP ⚡', emoji: '⚡', img: null, sound: () => audio.playLaser(), fx: () => effects.spawnLaserBeam() }
+    ]
   };
 
-  // Numbers 1-0 Map
+  // Numbers 1-0 Map with Emojis
   const numberMap = {
-    Digit1: { num: '1', name: 'ONE DINO 🦖', sound: () => audio.playDinoRoar() },
-    Digit2: { num: '2', name: 'TWO DOGS 🐶🐶', sound: () => audio.playDogBark() },
-    Digit3: { num: '3', name: 'THREE CATS 🐱🐱🐱', sound: () => audio.playCatMeow() },
-    Digit4: { num: '4', name: 'FOUR DUCKS 🦆🦆🦆🦆', sound: () => audio.playDuckQuack() },
-    Digit5: { num: '5', name: 'FIVE LIONS 🦁🦁🦁🦁🦁', sound: () => audio.playLionRoar() },
-    Digit6: { num: '6', name: 'SIX FROGS 🐸🐸🐸🐸🐸🐸', sound: () => audio.playFrogRibbit() },
-    Digit7: { num: '7', name: 'SEVEN COWS 🐮🐮🐮🐮🐮🐮🐮', sound: () => audio.playCowMoo() },
-    Digit8: { num: '8', name: 'EIGHT SHEEP 🐑🐑🐑🐑🐑🐑🐑🐑', sound: () => audio.playSheepBaa() },
-    Digit9: { num: '9', name: 'NINE ELEPHANTS 🐘🐘🐘🐘🐘🐘🐘🐘🐘', sound: () => audio.playElephantTrumpet() },
-    Digit0: { num: '10', name: 'TEN BIRDS 🐦🐦🐦🐦🐦🐦🐦🐦🐦🐦', sound: () => audio.playBirdChirp() }
+    Digit1: { num: '1', name: 'ONE DINO 🦖', emoji: '🦖', sound: () => audio.playDinoRoar() },
+    Digit2: { num: '2', name: 'TWO DOGS 🐶🐶', emoji: '🐶', sound: () => audio.playDogBark() },
+    Digit3: { num: '3', name: 'THREE CATS 🐱🐱🐱', emoji: '🐱', sound: () => audio.playCatMeow() },
+    Digit4: { num: '4', name: 'FOUR DUCKS 🦆🦆🦆🦆', emoji: '🦆', sound: () => audio.playDuckQuack() },
+    Digit5: { num: '5', name: 'FIVE LIONS 🦁🦁🦁🦁🦁', emoji: '🦁', sound: () => audio.playLionRoar() },
+    Digit6: { num: '6', name: 'SIX FROGS 🐸🐸🐸🐸🐸🐸', emoji: '🐸', sound: () => audio.playFrogRibbit() },
+    Digit7: { num: '7', name: 'SEVEN COWS 🐮🐮🐮🐮🐮🐮🐮', emoji: '🐮', sound: () => audio.playCowMoo() },
+    Digit8: { num: '8', name: 'EIGHT SHEEP 🐑🐑🐑🐑🐑🐑🐑🐑', emoji: '🐑', sound: () => audio.playSheepBaa() },
+    Digit9: { num: '9', name: 'NINE ELEPHANTS 🐘🐘🐘🐘🐘🐘🐘🐘🐘', emoji: '🐘', sound: () => audio.playElephantTrumpet() },
+    Digit0: { num: '10', name: 'TEN BIRDS 🐦🐦🐦🐦🐦🐦🐦🐦🐦🐦', emoji: '🐦', sound: () => audio.playBirdChirp() }
   };
 
   // Update HUD Badges
@@ -69,7 +177,7 @@
     badge.innerText = isPlaying ? '🦈 Baby Shark: ON 🎶' : '🦈 Baby Shark: OFF';
     badge.classList.toggle('active', isPlaying);
     if (isPlaying) {
-      effects.showSplashBanner('🦈', 'BABY SHARK DOO DOO!');
+      effects.showSplashBanner('🦈', 'BABY SHARK DOO DOO!', null, '🦈');
       effects.spawnConfetti(200);
     }
   }
@@ -82,7 +190,7 @@
     badge.classList.toggle('active', intensity > 0);
     if (intensity > 0) {
       audio.playLevelUp();
-      effects.showSplashBanner('🐹', squadTitle);
+      effects.showSplashBanner('🐹', squadTitle, 'images/pokemon/pikachu_ani.gif', null);
       effects.spawnFireworks();
     }
   }
@@ -112,10 +220,14 @@
     const code = e.code;
     const key = e.key;
 
-    // 1. Letters A - Z
+    // 1. Letters A - Z (Cycles through 3 distinct items per key!)
     if (vocabMap[code]) {
-      const item = vocabMap[code];
-      effects.showSplashBanner(item.letter, item.word);
+      const list = vocabMap[code];
+      const curIdx = cycleState[code] || 0;
+      const item = list[curIdx % list.length];
+      cycleState[code] = (curIdx + 1) % list.length;
+
+      effects.showSplashBanner(item.letter, item.word, item.img, item.emoji);
       audio.speakWord(item.word, code);
       item.sound();
       item.fx();
@@ -126,7 +238,7 @@
     // 2. Numbers 1 - 0
     if (numberMap[code]) {
       const item = numberMap[code];
-      effects.showSplashBanner(item.num, item.name);
+      effects.showSplashBanner(item.num, item.name, null, item.emoji);
       audio.speakWord(`${item.num}! ${item.name}`, code);
       item.sound();
       effects.spawnBouncingBall();
