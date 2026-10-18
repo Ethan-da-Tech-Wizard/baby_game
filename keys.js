@@ -228,7 +228,7 @@
       cycleState[code] = (curIdx + 1) % list.length;
 
       effects.showSplashBanner(item.letter, item.word, item.img, item.emoji);
-      audio.speakWord(item.word, code);
+      audio.speakWord(item.word, code, curIdx % list.length);
       item.sound();
       item.fx();
       effects.triggerFlash();
