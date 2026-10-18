@@ -12,7 +12,19 @@ Every single key on the keyboard does something drastically different across the
 - 🦈 **Baby Shark Mode**: Toggle the iconic *Baby Shark* melody on and off with key `T` or the on-screen toggle!
 - 🦁 **10+ Animal Sounds**: Procedurally synthesized cow, duck, dog, cat, sheep, lion, frog, elephant, bird, dinosaur, and more!
 - ⚡ **Anime Action Backdrops**: Toddler-appropriate, heroic, high-energy action loops (DBZ Super Saiyan Ki aura, Naruto Ninja Dash, Luffy Gear Charge, Pokémon Island) with **zero adult content, nudity, or gore**. Cycle anytime with `Tab`.
-- 🐹 **Dancing Pokémon Troupe**: Key `P` summons dancing pocket monsters (Pikachu, Charmander, Squirtle, Jigglypuff) with multi-level intensity!
+- 🐹 **Dancing Pokémon Troupe & Kaiju Crew**:
+  - **Press `P`**: Cycles dance squads and triggers the **Ultimate 10-Pokémon Dance Stampede**!
+  - **Direct Key Summons**:
+    - **`K`**: **Kangaskhan** (Big parent beast with baby Kangaskhan waving from pouch!)
+    - **`N`**: **Nidoking** (Royal purple armored rhino-monster with drill horn!)
+    - **`B`**: **Blastoise** (Water turtle blasting animated twin shoulder water cannons!)
+    - **`V`**: **Venusaur** (Tropical pink flower bloom with animated whipping vine whips!)
+    - **`A`**: **Aerodactyl** (Prehistoric pterosaur dragon flapping violet wings in flight!)
+    - **`C`**: **Charizard** (Orange winged fire dragon flapping wings and blowing flame smoke!)
+    - **`Z`**: **Zigzagoon** (Early route raccoon with zig-zag bristly fur doing a zig-zag dash dance!)
+    - **`S`**: **Starly** (Gen 4 Sinnoh early bird with fluttering wings and curled black head crest!)
+    - **`J`**: **Togepi** (Eggshell baby with red & blue triangles waving its tiny arms!)
+    - **`P`**: **Pikachu & Party** (Electric mouse wiggling ears with red glowing cheeks!)
 - 🌈 **Crazy Visual FX**: Rainbow warp, fireworks, lightning storms, raining clouds, bubble popping, bouncing physics balls, laser cannons, disco strobe, and confetti cannons!
 - 🔒 **Toddler-Proof Chromebook Defense**:
   - Intercepts keys like `Backspace`, `Tab`, `Alt`, and `Space` to prevent accidental navigation or tab closure.

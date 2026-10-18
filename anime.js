@@ -377,47 +377,123 @@ class AnimeBackdropEngine {
  */
 class PokemonTroupeManager {
   constructor() {
-    this.intensity = 0; // 0 = Off, 1 = Solo Pikachu, 2 = Duo, 3 = Full Crew, 4 = Rave
+    this.intensity = 0; // 0 = Off, 1 = Kanto Titans, 2 = Kaiju & Dinosaurs, 3 = Early Route & Baby, 4 = MEGA ALL-POKEMON STAMPEDE!
     this.maxIntensity = 4;
     this.time = 0;
+
+    // Optional spotlight single summons
+    this.activeSummon = null; // e.g. 'kangaskhan', 'blastoise', 'charizard', etc.
+    this.summonTimer = null;
   }
 
   toggle() {
+    this.activeSummon = null;
     this.intensity = (this.intensity + 1) % (this.maxIntensity + 1);
     return this.intensity;
   }
 
+  summon(name) {
+    this.activeSummon = name;
+    if (this.summonTimer) clearTimeout(this.summonTimer);
+    // Persist or stay on for 12 seconds
+    this.summonTimer = setTimeout(() => {
+      this.activeSummon = null;
+    }, 12000);
+  }
+
+  getSquadName() {
+    const names = [
+      'OFF',
+      '🔥 Kanto Heavyweights (Charizard, Blastoise, Venusaur, Pikachu)',
+      '🦖 Kaiju Giants (Kangaskhan & Baby, Nidoking, Aerodactyl)',
+      '🐣 Early Route & Babies (Togepi, Zigzagoon, Starly)',
+      '🌟 ULTIMATE 10-POKÉMON DANCE STAMPEDE! 🌟'
+    ];
+    return names[this.intensity] || 'Pokémon Dance Party';
+  }
+
   render(ctx, width, height) {
-    if (this.intensity === 0) return;
     this.time += 0.08;
+    const groundY = height * 0.76;
+    const bounceBeat = Math.abs(Math.sin(this.time * 3.5));
+    const sideWiggle = Math.sin(this.time * 3.5);
 
-    const groundY = height * 0.75;
-    const bounceBeat = Math.abs(Math.sin(this.time * 3));
-    const sideWiggle = Math.sin(this.time * 3);
-
-    // Intensity 1: Pikachu Solo
-    if (this.intensity >= 1) {
-      const pikaX = this.intensity === 1 ? width * 0.5 : width * 0.35;
-      this.drawPikachu(ctx, pikaX, groundY, bounceBeat, sideWiggle);
+    // If a specific Pokémon was summoned by keypress, highlight them center-stage!
+    if (this.activeSummon) {
+      this.renderSpecificPokemon(ctx, this.activeSummon, width * 0.5, groundY, bounceBeat, sideWiggle);
     }
 
-    // Intensity 2: Charmander
-    if (this.intensity >= 2) {
-      const charX = width * 0.65;
-      this.drawCharmander(ctx, charX, groundY, bounceBeat, -sideWiggle);
+    if (this.intensity === 0) return;
+
+    // SQUAD 1: Kanto Heavyweights (Pikachu, Charizard, Blastoise, Venusaur)
+    if (this.intensity === 1 || this.intensity === 4) {
+      const pScale = this.intensity === 4 ? 0.75 : 1.0;
+      this.drawPikachu(ctx, width * 0.12, groundY, bounceBeat, sideWiggle, pScale);
+      this.drawCharizard(ctx, width * 0.38, groundY, bounceBeat, sideWiggle);
+      this.drawBlastoise(ctx, width * 0.62, groundY, bounceBeat, -sideWiggle);
+      this.drawVenusaur(ctx, width * 0.86, groundY, bounceBeat, sideWiggle);
     }
 
-    // Intensity 3: Squirtle & Jigglypuff
-    if (this.intensity >= 3) {
-      const squirtX = width * 0.18;
-      const puffX = width * 0.82;
-      this.drawSquirtle(ctx, squirtX, groundY, bounceBeat, sideWiggle);
-      this.drawJigglypuff(ctx, puffX, groundY - 40, bounceBeat, -sideWiggle);
+    // SQUAD 2: Kaiju Giants (Kangaskhan & Baby, Nidoking, Aerodactyl)
+    if (this.intensity === 2 || this.intensity === 4) {
+      const kangaX = this.intensity === 4 ? width * 0.25 : width * 0.3;
+      const nidoX = this.intensity === 4 ? width * 0.75 : width * 0.7;
+      const aeroX = width * 0.5;
+
+      this.drawKangaskhan(ctx, kangaX, groundY, bounceBeat, -sideWiggle);
+      this.drawNidoking(ctx, nidoX, groundY, bounceBeat, sideWiggle);
+      this.drawAerodactyl(ctx, aeroX, height * 0.28, bounceBeat, sideWiggle);
     }
 
-    // Intensity 4: Disco Sparkles & Spotlight
-    if (this.intensity >= 4) {
+    // SQUAD 3: Early Route & Cute Babies (Togepi, Zigzagoon, Starly)
+    if (this.intensity === 3 || this.intensity === 4) {
+      const togepiX = this.intensity === 4 ? width * 0.48 : width * 0.28;
+      const zigX = this.intensity === 4 ? width * 0.92 : width * 0.52;
+      const starX = this.intensity === 4 ? width * 0.08 : width * 0.78;
+
+      this.drawTogepi(ctx, togepiX, groundY - 10, bounceBeat, sideWiggle);
+      this.drawZigzagoon(ctx, zigX, groundY, bounceBeat, sideWiggle);
+      this.drawStarly(ctx, starX, height * 0.45, bounceBeat, sideWiggle);
+    }
+
+    // Intensity 4: Disco Sparkles & Multi-Color Spotlight Rave
+    if (this.intensity === 4) {
       this.renderRaveDiscoBeams(ctx, width, height);
+    }
+  }
+
+  renderSpecificPokemon(ctx, name, x, y, bounce, wiggle) {
+    switch (name.toLowerCase()) {
+      case 'charizard':
+        this.drawCharizard(ctx, x, y, bounce, wiggle);
+        break;
+      case 'blastoise':
+        this.drawBlastoise(ctx, x, y, bounce, wiggle);
+        break;
+      case 'venusaur':
+        this.drawVenusaur(ctx, x, y, bounce, wiggle);
+        break;
+      case 'kangaskhan':
+        this.drawKangaskhan(ctx, x, y, bounce, wiggle);
+        break;
+      case 'nidoking':
+        this.drawNidoking(ctx, x, y, bounce, wiggle);
+        break;
+      case 'aerodactyl':
+        this.drawAerodactyl(ctx, x, y - 160, bounce, wiggle);
+        break;
+      case 'zigzagoon':
+        this.drawZigzagoon(ctx, x, y, bounce, wiggle);
+        break;
+      case 'starly':
+        this.drawStarly(ctx, x, y - 120, bounce, wiggle);
+        break;
+      case 'togepi':
+        this.drawTogepi(ctx, x, y - 10, bounce, wiggle);
+        break;
+      default:
+        this.drawPikachu(ctx, x, y, bounce, wiggle);
+        break;
     }
   }
 
@@ -761,6 +837,961 @@ class PokemonTroupeManager {
     ctx.font = '22px Arial';
     ctx.fillText('♪', 15 + Math.sin(this.time * 4) * 10, -45);
     ctx.fillText('♫', -25 + Math.cos(this.time * 4) * 10, -55);
+
+    ctx.restore();
+  }
+
+  // 1. 🔥 CHARIZARD (Fire Flying Dragon)
+  drawCharizard(ctx, x, y, bounce, wiggle) {
+    ctx.save();
+    ctx.translate(x + wiggle * 8, y - bounce * 35);
+
+    // Drop Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(0, 35 + bounce * 35, 65, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Wings (Flapping!)
+    const wingFlap = Math.sin(this.time * 5) * 0.25;
+    // Left Wing
+    ctx.save();
+    ctx.translate(-25, -45);
+    ctx.rotate(-0.3 + wingFlap);
+    ctx.fillStyle = '#ea580c';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-70, -60);
+    ctx.lineTo(-45, -20);
+    ctx.lineTo(-75, 10);
+    ctx.closePath();
+    ctx.fill();
+    // Inner wing teal
+    ctx.fillStyle = '#0d9488';
+    ctx.beginPath();
+    ctx.moveTo(-5, -5);
+    ctx.lineTo(-60, -50);
+    ctx.lineTo(-40, -18);
+    ctx.lineTo(-65, 5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Right Wing
+    ctx.save();
+    ctx.translate(25, -45);
+    ctx.rotate(0.3 - wingFlap);
+    ctx.fillStyle = '#ea580c';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(70, -60);
+    ctx.lineTo(45, -20);
+    ctx.lineTo(75, 10);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#0d9488';
+    ctx.beginPath();
+    ctx.moveTo(5, -5);
+    ctx.lineTo(60, -50);
+    ctx.lineTo(40, -18);
+    ctx.lineTo(65, 5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Tail with blazing fire
+    ctx.fillStyle = '#ea580c';
+    ctx.beginPath();
+    ctx.moveTo(-20, 15);
+    ctx.quadraticCurveTo(-75, 25, -90, -15);
+    ctx.quadraticCurveTo(-65, 5, -15, 30);
+    ctx.fill();
+
+    // Tail Fire (Blazing!)
+    const flameSize = 18 + Math.sin(this.time * 9) * 5;
+    ctx.fillStyle = '#facc15';
+    ctx.shadowColor = '#f97316';
+    ctx.shadowBlur = 18;
+    ctx.beginPath();
+    ctx.arc(-90, -18, flameSize, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.arc(-90, -16, flameSize * 0.65, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Body
+    ctx.fillStyle = '#ea580c';
+    ctx.beginPath();
+    ctx.ellipse(0, 5, 45, 42, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Yellow Cream Belly
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.ellipse(5, 8, 25, 30, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Long Neck & Dragon Head
+    ctx.fillStyle = '#ea580c';
+    ctx.beginPath();
+    ctx.moveTo(-15, -25);
+    ctx.quadraticCurveTo(-20, -55, 0, -65);
+    ctx.lineTo(25, -60);
+    ctx.quadraticCurveTo(20, -35, 15, -25);
+    ctx.fill();
+
+    // Head Snout
+    ctx.beginPath();
+    ctx.ellipse(8, -62, 24, 18, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dual Horns
+    ctx.fillStyle = '#c2410c';
+    ctx.beginPath();
+    ctx.moveTo(-2, -72);
+    ctx.lineTo(-20, -92);
+    ctx.lineTo(-8, -75);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(12, -72);
+    ctx.lineTo(2, -92);
+    ctx.lineTo(18, -75);
+    ctx.closePath();
+    ctx.fill();
+
+    // Fierce/Friendly Dragon Eyes
+    ctx.fillStyle = '#0284c7';
+    ctx.beginPath();
+    ctx.arc(14, -66, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(16, -67, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Friendly Flame Breath Smoke Rings
+    ctx.fillStyle = 'rgba(255, 120, 0, 0.6)';
+    ctx.beginPath();
+    let smokeX = 35 + (this.time * 30 % 40);
+    let smokeY = -60 - (this.time * 15 % 25);
+    ctx.arc(smokeX, smokeY, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // 2. 🐢 BLASTOISE (Water Shell Turtle with Shoulder Cannons)
+  drawBlastoise(ctx, x, y, bounce, wiggle) {
+    ctx.save();
+    ctx.translate(x + wiggle * 8, y - bounce * 30);
+
+    // Drop Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(0, 35 + bounce * 30, 68, 20, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dual Shoulder Water Cannons (Steel Cylinders)
+    ctx.fillStyle = '#64748b';
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 3;
+    // Left Cannon
+    ctx.save();
+    ctx.translate(-38, -55);
+    ctx.rotate(-0.4);
+    ctx.fillRect(-10, -28, 20, 35);
+    ctx.strokeRect(-10, -28, 20, 35);
+    // Water blast nozzle
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(-12, -34, 24, 7);
+    ctx.restore();
+
+    // Right Cannon
+    ctx.save();
+    ctx.translate(38, -55);
+    ctx.rotate(0.4);
+    ctx.fillRect(-10, -28, 20, 35);
+    ctx.strokeRect(-10, -28, 20, 35);
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(-12, -34, 24, 7);
+    ctx.restore();
+
+    // Water Hydro-Pump Blast (Animated pressurized water streams!)
+    ctx.save();
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.7)';
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 6;
+    // Left water stream
+    ctx.beginPath();
+    ctx.moveTo(-45, -78);
+    ctx.quadraticCurveTo(-75, -125, -95 + Math.sin(this.time * 8) * 15, -155);
+    ctx.stroke();
+    // Right water stream
+    ctx.beginPath();
+    ctx.moveTo(45, -78);
+    ctx.quadraticCurveTo(75, -125, 95 - Math.sin(this.time * 8) * 15, -155);
+    ctx.stroke();
+
+    // Water droplets
+    for (let w = 0; w < 4; w++) {
+      ctx.beginPath();
+      ctx.arc(-95 + Math.sin(this.time * 6 + w) * 20, -155 - w * 15, 6, 0, Math.PI * 2);
+      ctx.arc(95 - Math.sin(this.time * 6 + w) * 20, -155 - w * 15, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Brown Shell Back Rim
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.ellipse(0, -5, 56, 52, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fef08a';
+    ctx.lineWidth = 6;
+    ctx.stroke();
+
+    // Blue Body & Big Chunky Arms
+    ctx.fillStyle = '#0284c7';
+    ctx.beginPath();
+    ctx.ellipse(0, 8, 48, 40, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cream Ribbed Belly Shell
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.ellipse(0, 10, 32, 30, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#ca8a04';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-25, 5);
+    ctx.lineTo(25, 5);
+    ctx.moveTo(-28, 18);
+    ctx.lineTo(28, 18);
+    ctx.stroke();
+
+    // Head
+    ctx.fillStyle = '#0284c7';
+    ctx.beginPath();
+    ctx.ellipse(0, -32, 34, 28, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eyes
+    ctx.fillStyle = '#991b1b';
+    ctx.beginPath();
+    ctx.arc(-14, -36, 5, 0, Math.PI * 2);
+    ctx.arc(14, -36, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Big Confident Turtle Smile
+    ctx.strokeStyle = '#0c4a6e';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(0, -22, 14, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+
+    // Chunky Bouncing Claws
+    ctx.fillStyle = '#0284c7';
+    ctx.beginPath();
+    ctx.arc(-42, 10 + wiggle * 8, 14, 0, Math.PI * 2);
+    ctx.arc(42, 10 - wiggle * 8, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // 3. 🌺 VENUSAUR (Flower Dinosaur with Vine Whips)
+  drawVenusaur(ctx, x, y, bounce, wiggle) {
+    ctx.save();
+    ctx.translate(x + wiggle * 6, y - bounce * 25);
+
+    // Drop Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(0, 35 + bounce * 25, 75, 20, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Big Palm Leaves under flower
+    ctx.fillStyle = '#15803d';
+    for (let l = 0; l < 4; l++) {
+      ctx.save();
+      ctx.translate(0, -35);
+      ctx.rotate((Math.PI / 2) * l + 0.3);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 60, 22, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Giant Pink Tropical Flower (5 Petals with Yellow Center)
+    ctx.fillStyle = '#f43f5e';
+    for (let p = 0; p < 5; p++) {
+      const angle = (Math.PI * 2 / 5) * p + Math.sin(this.time * 2) * 0.1;
+      const px = Math.cos(angle) * 36;
+      const py = -45 + Math.sin(angle) * 22;
+      ctx.beginPath();
+      ctx.arc(px, py, 22, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Flower center bud
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.arc(0, -45, 18, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Animated Vine Whips (Swirling from flower base!)
+    ctx.strokeStyle = '#16a34a';
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    // Left Vine Whip
+    ctx.beginPath();
+    ctx.moveTo(-25, -40);
+    const v1x = -65 + Math.sin(this.time * 6) * 30;
+    const v1y = -85 + Math.cos(this.time * 6) * 25;
+    ctx.quadraticCurveTo(-50, -90, v1x, v1y);
+    ctx.stroke();
+
+    // Right Vine Whip
+    ctx.beginPath();
+    ctx.moveTo(25, -40);
+    const v2x = 65 + Math.cos(this.time * 6) * 30;
+    const v2y = -85 + Math.sin(this.time * 6) * 25;
+    ctx.quadraticCurveTo(50, -90, v2x, v2y);
+    ctx.stroke();
+
+    // Big Sturdy Teal Dinosaur Body
+    ctx.fillStyle = '#0d9488';
+    ctx.beginPath();
+    ctx.ellipse(0, 8, 58, 36, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dark Blue Spots/Warts
+    ctx.fillStyle = '#0f766e';
+    ctx.beginPath();
+    ctx.arc(-25, 5, 8, 0, Math.PI * 2);
+    ctx.arc(30, 10, 10, 0, Math.PI * 2);
+    ctx.arc(5, 20, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Head
+    ctx.fillStyle = '#0d9488';
+    ctx.beginPath();
+    ctx.ellipse(0, -10, 42, 28, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Red Dinosaur Eyes
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.arc(-18, -14, 6, 0, Math.PI * 2);
+    ctx.arc(18, -14, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Wide Toad Mouth & Fangs
+    ctx.strokeStyle = '#042f2e';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(0, -2, 22, 0.1, Math.PI - 0.1);
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(-10, -2, 4, 6);
+    ctx.fillRect(8, -2, 4, 6);
+
+    ctx.restore();
+  }
+
+  // 4. 🦘 KANGASKHAN (Parent Beast with Baby in Pouch!)
+  drawKangaskhan(ctx, x, y, bounce, wiggle) {
+    ctx.save();
+    ctx.translate(x + wiggle * 8, y - bounce * 30);
+
+    // Drop Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(0, 35 + bounce * 30, 65, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Heavy Tail behind
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.moveTo(30, 15);
+    ctx.quadraticCurveTo(80, 25, 95, 0);
+    ctx.quadraticCurveTo(70, 0, 25, 5);
+    ctx.fill();
+
+    // Brown Body
+    ctx.fillStyle = '#92400e';
+    ctx.beginPath();
+    ctx.ellipse(0, 5, 50, 44, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dark Armor Shoulder Pads & Head Helmet
+    ctx.fillStyle = '#374151';
+    ctx.beginPath();
+    ctx.ellipse(-35, -15, 16, 12, -0.3, 0, Math.PI * 2);
+    ctx.ellipse(35, -15, 16, 12, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Head
+    ctx.fillStyle = '#92400e';
+    ctx.beginPath();
+    ctx.ellipse(0, -38, 36, 30, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Black Helmet Plate on Forehead
+    ctx.fillStyle = '#1f2937';
+    ctx.beginPath();
+    ctx.arc(0, -48, 22, Math.PI, Math.PI * 2);
+    ctx.fill();
+
+    // Friendly Eyes
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.arc(-14, -38, 5, 0, Math.PI * 2);
+    ctx.arc(14, -38, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Snout & Mouth
+    ctx.fillStyle = '#b45309';
+    ctx.beginPath();
+    ctx.ellipse(0, -26, 18, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#451a03';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, -24, 8, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+
+    // Belly Pouch Rim
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.arc(0, 15, 32, 0, Math.PI);
+    ctx.fill();
+
+    // 🐣 BABY KANGASKHAN (Peeking out of pouch and waving!)
+    const babyBounce = Math.sin(this.time * 6) * 5;
+    ctx.save();
+    ctx.translate(0, 5 + babyBounce);
+
+    // Baby Head (Lilac/Purple)
+    ctx.fillStyle = '#a855f7';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 16, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Baby Eyes
+    ctx.fillStyle = '#1e1b4b';
+    ctx.beginPath();
+    ctx.arc(-5, -2, 3, 0, Math.PI * 2);
+    ctx.arc(5, -2, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Baby Smile
+    ctx.strokeStyle = '#581c87';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 4, 4, 0, Math.PI);
+    ctx.stroke();
+
+    // Baby Waving Paws
+    ctx.fillStyle = '#a855f7';
+    ctx.beginPath();
+    ctx.arc(-14, -6 + Math.sin(this.time * 8) * 4, 4, 0, Math.PI * 2);
+    ctx.arc(14, -6 - Math.sin(this.time * 8) * 4, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  // 5. 👑 NIDOKING (Royal Purple Spiky Rhino Monster)
+  drawNidoking(ctx, x, y, bounce, wiggle) {
+    ctx.save();
+    ctx.translate(x + wiggle * 8, y - bounce * 32);
+
+    // Drop Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(0, 35 + bounce * 32, 65, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Big Heavy Spiked Tail
+    ctx.fillStyle = '#7e22ce';
+    ctx.beginPath();
+    ctx.moveTo(-25, 15);
+    ctx.quadraticCurveTo(-75, 25, -95, 0);
+    ctx.quadraticCurveTo(-65, -5, -20, 5);
+    ctx.fill();
+
+    // Spiky Back Ridges
+    ctx.fillStyle = '#581c87';
+    for (let r = 0; r < 4; r++) {
+      ctx.beginPath();
+      ctx.moveTo(-35 + r * 15, -20);
+      ctx.lineTo(-45 + r * 15, -45);
+      ctx.lineTo(-25 + r * 15, -25);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Royal Purple Body
+    ctx.fillStyle = '#7e22ce';
+    ctx.beginPath();
+    ctx.ellipse(0, 5, 48, 42, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // White/Cream Armored Chest Plates
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.ellipse(2, 6, 26, 28, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Spiked Ears with Green Inner
+    ctx.fillStyle = '#7e22ce';
+    // Left ear
+    ctx.beginPath();
+    ctx.moveTo(-25, -45);
+    ctx.lineTo(-55, -75);
+    ctx.lineTo(-20, -65);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#86efac';
+    ctx.beginPath();
+    ctx.moveTo(-24, -48);
+    ctx.lineTo(-45, -68);
+    ctx.lineTo(-22, -60);
+    ctx.closePath();
+    ctx.fill();
+
+    // Right ear
+    ctx.fillStyle = '#7e22ce';
+    ctx.beginPath();
+    ctx.moveTo(25, -45);
+    ctx.lineTo(55, -75);
+    ctx.lineTo(20, -65);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#86efac';
+    ctx.beginPath();
+    ctx.moveTo(24, -48);
+    ctx.lineTo(45, -68);
+    ctx.lineTo(22, -60);
+    ctx.closePath();
+    ctx.fill();
+
+    // Head
+    ctx.fillStyle = '#7e22ce';
+    ctx.beginPath();
+    ctx.ellipse(0, -36, 36, 28, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Large White Drill Horn on Forehead
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-8, -48);
+    ctx.lineTo(0, -85);
+    ctx.lineTo(8, -48);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Fierce Red Eyes
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.arc(-14, -36, 5, 0, Math.PI * 2);
+    ctx.arc(14, -36, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Sharp Toothed Grin
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(0, -22, 14, 0, Math.PI);
+    ctx.fill();
+    ctx.strokeStyle = '#3b0764';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Punching Claws
+    ctx.fillStyle = '#7e22ce';
+    ctx.beginPath();
+    ctx.arc(-35, 10 + wiggle * 10, 14, 0, Math.PI * 2);
+    ctx.arc(35, 10 - wiggle * 10, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // 6. 🦖 AERODACTYL (Prehistoric Flying Pterosaur Dragon)
+  drawAerodactyl(ctx, x, y, bounce, wiggle) {
+    ctx.save();
+    const flightY = y + Math.sin(this.time * 4) * 20;
+    ctx.translate(x + Math.sin(this.time * 2) * 35, flightY);
+
+    // Large Violet Wings (Flapping in flight!)
+    const wingFlap = Math.sin(this.time * 7) * 0.35;
+
+    // Left Wing
+    ctx.save();
+    ctx.rotate(-0.2 + wingFlap);
+    ctx.fillStyle = '#9ca3af';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-90, -45);
+    ctx.lineTo(-65, 15);
+    ctx.lineTo(-85, 35);
+    ctx.closePath();
+    ctx.fill();
+    // Inner wing purple
+    ctx.fillStyle = '#a855f7';
+    ctx.beginPath();
+    ctx.moveTo(-5, 0);
+    ctx.lineTo(-80, -35);
+    ctx.lineTo(-60, 12);
+    ctx.lineTo(-75, 30);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Right Wing
+    ctx.save();
+    ctx.rotate(0.2 - wingFlap);
+    ctx.fillStyle = '#9ca3af';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(90, -45);
+    ctx.lineTo(65, 15);
+    ctx.lineTo(85, 35);
+    ctx.closePath();
+    ctx.fill();
+    // Inner wing purple
+    ctx.fillStyle = '#a855f7';
+    ctx.beginPath();
+    ctx.moveTo(5, 0);
+    ctx.lineTo(80, -35);
+    ctx.lineTo(60, 12);
+    ctx.lineTo(75, 30);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Pointed Arrow Tail
+    ctx.fillStyle = '#6b7280';
+    ctx.beginPath();
+    ctx.moveTo(0, 20);
+    ctx.lineTo(Math.sin(this.time * 6) * 15, 65);
+    ctx.lineTo(Math.sin(this.time * 6) * 15 + 10, 80);
+    ctx.lineTo(Math.sin(this.time * 6) * 15 - 10, 80);
+    ctx.closePath();
+    ctx.fill();
+
+    // Grey Body
+    ctx.fillStyle = '#9ca3af';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 26, 32, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Long Pterosaur Head & Snout
+    ctx.beginPath();
+    ctx.ellipse(0, -32, 22, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pointed Crest Behind Head
+    ctx.beginPath();
+    ctx.moveTo(-10, -42);
+    ctx.lineTo(0, -68);
+    ctx.lineTo(10, -42);
+    ctx.closePath();
+    ctx.fill();
+
+    // Big Jaw with Sharp Teeth
+    ctx.fillStyle = '#e5e7eb';
+    ctx.beginPath();
+    ctx.moveTo(-16, -26);
+    ctx.lineTo(0, -10);
+    ctx.lineTo(16, -26);
+    ctx.closePath();
+    ctx.fill();
+
+    // Green Eyes
+    ctx.fillStyle = '#22c55e';
+    ctx.beginPath();
+    ctx.arc(-8, -34, 4, 0, Math.PI * 2);
+    ctx.arc(8, -34, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // 7. 🦝 ZIGZAGOON (Early Route Zig-Zag Raccoon)
+  drawZigzagoon(ctx, x, y, bounce, wiggle) {
+    ctx.save();
+    // Zig-Zag dance rhythm
+    const zigOffset = Math.sin(this.time * 6) * 22;
+    ctx.translate(x + zigOffset, y - bounce * 25);
+
+    // Drop Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(0, 32 + bounce * 25, 48, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Spiky Bristly Brown Fur Body
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.ellipse(0, 8, 38, 26, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Iconic Zig-Zag Cream Stripes
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.moveTo(-35, 8);
+    ctx.lineTo(-20, -4);
+    ctx.lineTo(-5, 8);
+    ctx.lineTo(10, -4);
+    ctx.lineTo(25, 8);
+    ctx.lineTo(10, 18);
+    ctx.lineTo(-5, 6);
+    ctx.lineTo(-20, 18);
+    ctx.closePath();
+    ctx.fill();
+
+    // Bushy Spiky Tail
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.moveTo(-30, 5);
+    ctx.lineTo(-58, -12);
+    ctx.lineTo(-42, 5);
+    ctx.lineTo(-55, 18);
+    ctx.closePath();
+    ctx.fill();
+
+    // Head
+    ctx.fillStyle = '#92400e';
+    ctx.beginPath();
+    ctx.ellipse(22, -8, 22, 18, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mask Patch
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.ellipse(22, -10, 16, 10, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Curious Eyes
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.arc(26, -11, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(27, -12, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Black Button Nose
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.arc(38, -6, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Little Paws Pattering
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.arc(-15, 24 + wiggle * 5, 6, 0, Math.PI * 2);
+    ctx.arc(15, 24 - wiggle * 5, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // 8. 🐦 STARLY (Sinnoh Gen 4 Early Route Bird with Curled Head Tuft!)
+  drawStarly(ctx, x, y, bounce, wiggle) {
+    ctx.save();
+    const flyY = y + Math.sin(this.time * 5) * 18;
+    ctx.translate(x + wiggle * 10, flyY);
+
+    // Rapid Wing Flaps
+    const wingAngle = Math.sin(this.time * 12) * 0.45;
+
+    // Wings
+    ctx.fillStyle = '#4b5563';
+    ctx.save();
+    ctx.rotate(wingAngle);
+    ctx.beginPath();
+    ctx.ellipse(-26, -5, 24, 10, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.rotate(-wingAngle);
+    ctx.beginPath();
+    ctx.ellipse(26, -5, 24, 10, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Tail Feathers
+    ctx.fillStyle = '#1f2937';
+    ctx.beginPath();
+    ctx.moveTo(0, 15);
+    ctx.lineTo(-8, 38);
+    ctx.lineTo(0, 32);
+    ctx.lineTo(8, 38);
+    ctx.closePath();
+    ctx.fill();
+
+    // Grey Plump Bird Body
+    ctx.fillStyle = '#4b5563';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 24, 22, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // White Chest Spot
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(0, 5, 14, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Head
+    ctx.fillStyle = '#374151';
+    ctx.beginPath();
+    ctx.arc(0, -20, 18, 0, Math.PI * 2);
+    ctx.fill();
+
+    // White Face Mask
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(0, -18, 12, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ICONIC CURLED BLACK HEAD TUFT / CREST!
+    ctx.strokeStyle = '#111827';
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(0, -36);
+    ctx.quadraticCurveTo(15, -50, 4, -58);
+    ctx.stroke();
+
+    // Orange Beak with Black Tip!
+    ctx.fillStyle = '#f97316';
+    ctx.beginPath();
+    ctx.moveTo(-6, -18);
+    ctx.lineTo(0, -8);
+    ctx.lineTo(6, -18);
+    ctx.closePath();
+    ctx.fill();
+    // Black tip
+    ctx.fillStyle = '#111827';
+    ctx.beginPath();
+    ctx.moveTo(-3, -13);
+    ctx.lineTo(0, -8);
+    ctx.lineTo(3, -13);
+    ctx.closePath();
+    ctx.fill();
+
+    // Cute Bird Eyes
+    ctx.fillStyle = '#111827';
+    ctx.beginPath();
+    ctx.arc(-6, -22, 3, 0, Math.PI * 2);
+    ctx.arc(6, -22, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // 9. 🐣 TOGEPI (Spike Ball Egg Baby with Blue & Red Shell Patterns!)
+  drawTogepi(ctx, x, y, bounce, wiggle) {
+    ctx.save();
+    ctx.translate(x + wiggle * 8, y - bounce * 26);
+
+    // Drop Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(0, 32 + bounce * 26, 36, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // White Eggshell Body
+    ctx.fillStyle = '#fdf4dc';
+    ctx.strokeStyle = '#e2d3b3';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.ellipse(0, 8, 30, 26, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Triangular Red & Blue Geometric Shell Patterns
+    // Red Triangle
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.moveTo(-15, 6);
+    ctx.lineTo(-5, 18);
+    ctx.lineTo(-18, 22);
+    ctx.closePath();
+    ctx.fill();
+
+    // Blue Triangle
+    ctx.fillStyle = '#3b82f6';
+    ctx.beginPath();
+    ctx.moveTo(8, 4);
+    ctx.lineTo(18, 14);
+    ctx.lineTo(5, 20);
+    ctx.closePath();
+    ctx.fill();
+
+    // Smaller red accent
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.moveTo(12, 18);
+    ctx.lineTo(18, 26);
+    ctx.lineTo(8, 28);
+    ctx.closePath();
+    ctx.fill();
+
+    // Five Pointy Spikes on Top of Head
+    ctx.fillStyle = '#fdf4dc';
+    for (let s = -2; s <= 2; s++) {
+      ctx.beginPath();
+      const sx = s * 11;
+      const sy = -14 - Math.abs(s) * 2;
+      ctx.moveTo(sx - 6, sy);
+      ctx.lineTo(sx, sy - 16);
+      ctx.lineTo(sx + 6, sy);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    // Cute Toddler Togepi Eyes
+    ctx.fillStyle = '#1e1b4b';
+    ctx.beginPath();
+    ctx.arc(-8, -8, 4, 0, Math.PI * 2);
+    ctx.arc(8, -8, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Rosy Cheeks
+    ctx.fillStyle = 'rgba(244, 63, 94, 0.6)';
+    ctx.beginPath();
+    ctx.arc(-16, -2, 4, 0, Math.PI * 2);
+    ctx.arc(16, -2, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cheerful Baby Open Smile
+    ctx.fillStyle = '#b91c1c';
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, Math.PI);
+    ctx.fill();
+
+    // Tiny Stubby Waving Arms
+    ctx.fillStyle = '#fdf4dc';
+    const armWave = Math.sin(this.time * 8) * 8;
+    ctx.beginPath();
+    ctx.arc(-26, -4 + armWave, 6, 0, Math.PI * 2);
+    ctx.arc(26, -4 - armWave, 6, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.restore();
   }
