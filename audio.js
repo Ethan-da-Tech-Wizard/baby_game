@@ -770,32 +770,83 @@ class SoundEngine {
   speakWord(text, keyCode, cycleIdx = 0) {
     if (this.isMuted) return;
 
+    // Stop previous voice playback if still speaking
+    if (this.currentVoiceAudio) {
+      try {
+        this.currentVoiceAudio.pause();
+        this.currentVoiceAudio.currentTime = 0;
+      } catch (e) {}
+      this.currentVoiceAudio = null;
+    }
+
     // Check if Dad's custom voice file is recorded for this specific cycle word or general key!
     const partKey = `${keyCode}_${cycleIdx + 1}`;
     const clipPath = (this.dadVoiceManifest && this.dadVoiceManifest[partKey]) ||
                      (this.dadVoiceManifest && this.dadVoiceManifest[keyCode]);
+    const introPath = this.dadVoiceManifest && this.dadVoiceManifest[`${keyCode}_intro`];
+
+    // "Letter is for..." Phonics logic:
+    // User requested: sometimes say "A is for..." before the word so that
+    // all variants (Apple, Aerodactyl, Astronaut) experience "the letter is for"
+    if (!this._letterIntroPlayed) this._letterIntroPlayed = {};
+    const shouldPlayIntro = !!introPath && (!this._letterIntroPlayed[keyCode] || Math.random() < 0.55);
+    this._letterIntroPlayed[keyCode] = true;
 
     if (clipPath) {
       try {
-        const audio = new Audio(clipPath);
-        audio.volume = this.volumeLevel;
-        audio.play().catch(() => {
-          this.playSpeechSynthFallback(text);
-        });
-        return;
+        if (shouldPlayIntro) {
+          const introAudio = new Audio(introPath);
+          introAudio.volume = this.volumeLevel;
+          this.currentVoiceAudio = introAudio;
+
+          introAudio.onended = () => {
+            try {
+              const wordAudio = new Audio(clipPath);
+              wordAudio.volume = this.volumeLevel;
+              this.currentVoiceAudio = wordAudio;
+              wordAudio.play().catch(() => {});
+            } catch (e) {}
+          };
+
+          introAudio.play().catch(() => {
+            // Fallback directly to the word clip
+            const wordAudio = new Audio(clipPath);
+            wordAudio.volume = this.volumeLevel;
+            this.currentVoiceAudio = wordAudio;
+            wordAudio.play().catch(() => this.playSpeechSynthFallback(text, keyCode));
+          });
+          return;
+        } else {
+          const wordAudio = new Audio(clipPath);
+          wordAudio.volume = this.volumeLevel;
+          this.currentVoiceAudio = wordAudio;
+          wordAudio.play().catch(() => {
+            this.playSpeechSynthFallback(text, keyCode);
+          });
+          return;
+        }
       } catch (e) {
         // Fall back to synth
       }
     }
 
-    this.playSpeechSynthFallback(text);
+    this.playSpeechSynthFallback(text, keyCode);
   }
 
-  playSpeechSynthFallback(text) {
+  playSpeechSynthFallback(text, keyCode) {
     if (!('speechSynthesis' in window)) return;
     try {
       window.speechSynthesis.cancel(); // clear queue for instant responsiveness
-      const utter = new SpeechSynthesisUtterance(text);
+      let phrase = text;
+      // Strip emojis from text for clean speech synthesis
+      const cleanWord = text.replace(/[\p{Emoji}\u200d]+/gu, '').trim();
+      if (keyCode && keyCode.startsWith('Key') && Math.random() < 0.55) {
+        const letter = keyCode.slice(3);
+        phrase = `${letter} is for ${cleanWord}`;
+      } else {
+        phrase = cleanWord;
+      }
+      const utter = new SpeechSynthesisUtterance(phrase);
       utter.pitch = 1.35; // friendly toddler pitch
       utter.rate = 0.95;  // easy to hear
       window.speechSynthesis.speak(utter);

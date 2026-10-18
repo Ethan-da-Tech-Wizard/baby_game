@@ -25,48 +25,49 @@ MANIFEST_PATH = os.path.join(OUTPUT_DIR, "manifest.json")
 
 # 3-Word Prompts matching the 3-item cycling game engine
 VOICE_ITEMS = [
-    # Letters (A-Z)
-    {"key": "KeyA", "title": "A", "words": ["Apple", "Aerodactyl", "Astronaut"], "prompt": "Apple! Aerodactyl! Astronaut!"},
-    {"key": "KeyB", "title": "B", "words": ["Ball", "Blastoise", "Butterfly"], "prompt": "Ball! Blastoise! Butterfly!"},
-    {"key": "KeyC", "title": "C", "words": ["Cat", "Charizard", "Car"], "prompt": "Cat! Charizard! Car!"},
-    {"key": "KeyD", "title": "D", "words": ["Dog", "Dinosaur", "Drum"], "prompt": "Dog! Dinosaur! Drum!"},
-    {"key": "KeyE", "title": "E", "words": ["Elephant", "Electricity", "Earth"], "prompt": "Elephant! Electricity! Earth!"},
-    {"key": "KeyF", "title": "F", "words": ["Frog", "Fireworks", "Fire Truck"], "prompt": "Frog! Fireworks! Fire Truck!"},
-    {"key": "KeyG", "title": "G", "words": ["Galaxy", "Giraffe", "Guitar"], "prompt": "Galaxy! Giraffe! Guitar!"},
-    {"key": "KeyH", "title": "H", "words": ["Heart", "Horse", "Helicopter"], "prompt": "Heart! Horse! Helicopter!"},
-    {"key": "KeyI", "title": "I", "words": ["Ice Cream", "Igloo", "Island"], "prompt": "Ice Cream! Igloo! Island!"},
-    {"key": "KeyJ", "title": "J", "words": ["Togepi", "Jump", "Juice"], "prompt": "Togepi! Jump! Juice!"},
-    {"key": "KeyK", "title": "K", "words": ["Kangaskhan", "Kite", "Koala"], "prompt": "Kangaskhan! Kite! Koala!"},
-    {"key": "KeyL", "title": "L", "words": ["Lion", "Lightning", "Lollipop"], "prompt": "Lion! Lightning! Lollipop!"},
-    {"key": "KeyM", "title": "M", "words": ["Monkey", "Moon", "Music"], "prompt": "Monkey! Moon! Music!"},
-    {"key": "KeyN", "title": "N", "words": ["Nidoking", "Ninja", "Nest"], "prompt": "Nidoking! Ninja! Nest!"},
-    {"key": "KeyO", "title": "O", "words": ["Owl", "Octopus", "Orange"], "prompt": "Owl! Octopus! Orange!"},
-    {"key": "KeyP", "title": "P", "words": ["Pikachu", "Puppy", "Party"], "prompt": "Pikachu! Puppy! Party!"},
-    {"key": "KeyQ", "title": "Q", "words": ["Queen", "Quack", "Quiet"], "prompt": "Queen! Quack! Quiet!"},
-    {"key": "KeyR", "title": "R", "words": ["Rainbow", "Rocket", "Robot"], "prompt": "Rainbow! Rocket! Robot!"},
-    {"key": "KeyS", "title": "S", "words": ["Starly", "Sun", "Super Saiyan"], "prompt": "Starly! Sun! Super Saiyan!"},
-    {"key": "KeyT", "title": "T", "words": ["Baby Shark", "Train", "Turtle"], "prompt": "Baby Shark! Train! Turtle!"},
-    {"key": "KeyU", "title": "U", "words": ["Unicorn", "Umbrella", "UFO"], "prompt": "Unicorn! Umbrella! UFO!"},
-    {"key": "KeyV", "title": "V", "words": ["Venusaur", "Victory", "Volcano"], "prompt": "Venusaur! Victory! Volcano!"},
-    {"key": "KeyW", "title": "W", "words": ["Water", "Whale", "Wind"], "prompt": "Water! Whale! Wind!"},
-    {"key": "KeyX", "title": "X", "words": ["Xylophone", "X-Ray", "Treasure"], "prompt": "Xylophone! X-Ray! Treasure!"},
-    {"key": "KeyY", "title": "Y", "words": ["Donut", "Yoyo", "Yacht"], "prompt": "Donut! Yoyo! Yacht!"},
-    {"key": "KeyZ", "title": "Z", "words": ["Zigzagoon", "Zebra", "Zap"], "prompt": "Zigzagoon! Zebra! Zap!"},
+    # Letters (A-Z) - Workflow: "[Letter] is for... [Word 1]... [Word 2]... [Word 3]"
+    {"key": "KeyA", "title": "A", "words": ["Apple", "Aerodactyl", "Astronaut"], "prompt": "A is for... Apple! Aerodactyl! Astronaut!"},
+    {"key": "KeyB", "title": "B", "words": ["Ball", "Blastoise", "Butterfly"], "prompt": "B is for... Ball! Blastoise! Butterfly!"},
+    {"key": "KeyC", "title": "C", "words": ["Cat", "Charizard", "Car"], "prompt": "C is for... Cat! Charizard! Car!"},
+    {"key": "KeyD", "title": "D", "words": ["Dog", "Dinosaur", "Drum"], "prompt": "D is for... Dog! Dinosaur! Drum!"},
+    {"key": "KeyE", "title": "E", "words": ["Elephant", "Electricity", "Earth"], "prompt": "E is for... Elephant! Electricity! Earth!"},
+    {"key": "KeyF", "title": "F", "words": ["Frog", "Fireworks", "Fire Truck"], "prompt": "F is for... Frog! Fireworks! Fire Truck!"},
+    {"key": "KeyG", "title": "G", "words": ["Galaxy", "Giraffe", "Guitar"], "prompt": "G is for... Galaxy! Giraffe! Guitar!"},
+    {"key": "KeyH", "title": "H", "words": ["Heart", "Horse", "Helicopter"], "prompt": "H is for... Heart! Horse! Helicopter!"},
+    {"key": "KeyI", "title": "I", "words": ["Ice Cream", "Igloo", "Island"], "prompt": "I is for... Ice Cream! Igloo! Island!"},
+    {"key": "KeyJ", "title": "J", "words": ["Togepi", "Jump", "Juice"], "prompt": "J is for... Togepi! Jump! Juice!"},
+    {"key": "KeyK", "title": "K", "words": ["Kangaskhan", "Kite", "Koala"], "prompt": "K is for... Kangaskhan! Kite! Koala!"},
+    {"key": "KeyL", "title": "L", "words": ["Lion", "Lightning", "Lollipop"], "prompt": "L is for... Lion! Lightning! Lollipop!"},
+    {"key": "KeyM", "title": "M", "words": ["Monkey", "Moon", "Music"], "prompt": "M is for... Monkey! Moon! Music!"},
+    {"key": "KeyN", "title": "N", "words": ["Nidoking", "Ninja", "Nest"], "prompt": "N is for... Nidoking! Ninja! Nest!"},
+    {"key": "KeyO", "title": "O", "words": ["Owl", "Octopus", "Orange"], "prompt": "O is for... Owl! Octopus! Orange!"},
+    {"key": "KeyP", "title": "P", "words": ["Pikachu", "Puppy", "Party"], "prompt": "P is for... Pikachu! Puppy! Party!"},
+    {"key": "KeyQ", "title": "Q", "words": ["Queen", "Quack", "Quiet"], "prompt": "Q is for... Queen! Quack! Quiet!"},
+    {"key": "KeyR", "title": "R", "words": ["Rainbow", "Rocket", "Robot"], "prompt": "R is for... Rainbow! Rocket! Robot!"},
+    {"key": "KeyS", "title": "S", "words": ["Starly", "Sun", "Super Saiyan"], "prompt": "S is for... Starly! Sun! Super Saiyan!"},
+    {"key": "KeyT", "title": "T", "words": ["Baby Shark", "Train", "Turtle"], "prompt": "T is for... Baby Shark! Train! Turtle!"},
+    {"key": "KeyU", "title": "U", "words": ["Unicorn", "Umbrella", "UFO"], "prompt": "U is for... Unicorn! Umbrella! UFO!"},
+    {"key": "KeyV", "title": "V", "words": ["Venusaur", "Victory", "Volcano"], "prompt": "V is for... Venusaur! Victory! Volcano!"},
+    {"key": "KeyW", "title": "W", "words": ["Water", "Whale", "Wind"], "prompt": "W is for... Water! Whale! Wind!"},
+    {"key": "KeyX", "title": "X", "words": ["Xylophone", "X-Ray", "Treasure"], "prompt": "X is for... Xylophone! X-Ray! Treasure!"},
+    {"key": "KeyY", "title": "Y", "words": ["Donut", "Yoyo", "Yacht"], "prompt": "Y is for... Donut! Yoyo! Yacht!"},
+    {"key": "KeyZ", "title": "Z", "words": ["Zigzagoon", "Zebra", "Zap"], "prompt": "Z is for... Zigzagoon! Zebra! Zap!"},
     # Numbers (1-0)
-    {"key": "Digit1", "title": "1", "words": ["One", "Dino", "Uno"], "prompt": "One! Dino! Uno!"},
-    {"key": "Digit2", "title": "2", "words": ["Two", "Puppy", "Dogs"], "prompt": "Two! Puppy! Dogs!"},
-    {"key": "Digit3", "title": "3", "words": ["Three", "Cats", "Kittens"], "prompt": "Three! Cats! Kittens!"},
-    {"key": "Digit4", "title": "4", "words": ["Four", "Ducks", "Quack"], "prompt": "Four! Ducks! Quack!"},
-    {"key": "Digit5", "title": "5", "words": ["Five", "Lions", "Roar"], "prompt": "Five! Lions! Roar!"},
-    {"key": "Digit6", "title": "6", "words": ["Six", "Frogs", "Ribbit"], "prompt": "Six! Frogs! Ribbit!"},
-    {"key": "Digit7", "title": "7", "words": ["Seven", "Cows", "Moo"], "prompt": "Seven! Cows! Moo!"},
-    {"key": "Digit8", "title": "8", "words": ["Eight", "Sheep", "Baa"], "prompt": "Eight! Sheep! Baa!"},
-    {"key": "Digit9", "title": "9", "words": ["Nine", "Elephants", "Stomp"], "prompt": "Nine! Elephants! Stomp!"},
-    {"key": "Digit0", "title": "10", "words": ["Ten", "Birds", "Chirp"], "prompt": "Ten! Birds! Chirp!"},
+    {"key": "Digit1", "title": "1", "words": ["One", "Dino", "Uno"], "prompt": "1 is for... One! Dino! Uno!"},
+    {"key": "Digit2", "title": "2", "words": ["Two", "Puppy", "Dogs"], "prompt": "2 is for... Two! Puppy! Dogs!"},
+    {"key": "Digit3", "title": "3", "words": ["Three", "Cats", "Kittens"], "prompt": "3 is for... Three! Cats! Kittens!"},
+    {"key": "Digit4", "title": "4", "words": ["Four", "Ducks", "Quack"], "prompt": "4 is for... Four! Ducks! Quack!"},
+    {"key": "Digit5", "title": "5", "words": ["Five", "Lions", "Roar"], "prompt": "5 is for... Five! Lions! Roar!"},
+    {"key": "Digit6", "title": "6", "words": ["Six", "Frogs", "Ribbit"], "prompt": "6 is for... Six! Frogs! Ribbit!"},
+    {"key": "Digit7", "title": "7", "words": ["Seven", "Cows", "Moo"], "prompt": "7 is for... Seven! Cows! Moo!"},
+    {"key": "Digit8", "title": "8", "words": ["Eight", "Sheep", "Baa"], "prompt": "8 is for... Eight! Sheep! Baa!"},
+    {"key": "Digit9", "title": "9", "words": ["Nine", "Elephants", "Stomp"], "prompt": "9 is for... Nine! Elephants! Stomp!"},
+    {"key": "Digit0", "title": "10", "words": ["Ten", "Birds", "Chirp"], "prompt": "10 is for... Ten! Birds! Chirp!"},
     # Specials
-    {"key": "Space", "title": "Space", "words": ["Party", "Woohoo", "Celebrate"], "prompt": "Party! Woohoo! Celebrate!"},
-    {"key": "Enter", "title": "Enter", "words": ["Earthquake", "Boom", "Explosion"], "prompt": "Earthquake! Boom! Explosion!"}
+    {"key": "Space", "title": "Space", "words": ["Party", "Woohoo", "Celebrate"], "prompt": "Space is for... Party! Woohoo! Celebrate!"},
+    {"key": "Enter", "title": "Enter", "words": ["Earthquake", "Boom", "Explosion"], "prompt": "Enter is for... Earthquake! Boom! Explosion!"}
 ]
+
 
 def ensure_dirs():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -107,14 +108,14 @@ def detect_speech_segments(wav_path):
         energies.append(rms)
 
     max_e = max(energies) if energies else 1
-    threshold = max(200.0, max_e * 0.12)
+    threshold = max(160.0, max_e * 0.12)
     is_speech = [e > threshold for e in energies]
 
     segments = []
     in_seg = False
     start = 0
     silence_count = 0
-    min_silence_blocks = int(0.18 / 0.02) # 180ms pause = word boundary
+    min_silence_blocks = int(0.14 / 0.02) # 140ms pause between chunks
 
     for idx, sp in enumerate(is_speech):
         if sp:
@@ -127,19 +128,19 @@ def detect_speech_segments(wav_path):
                 silence_count += 1
                 if silence_count >= min_silence_blocks:
                     end = min(len(is_speech), idx - silence_count + 3)
-                    if (end - start) * 0.02 >= 0.22:
+                    if (end - start) * 0.02 >= 0.18:
                         segments.append((start * block_size, end * block_size))
                     in_seg = False
                     silence_count = 0
 
     if in_seg:
-        end = min(len(is_speech), len(is_speech))
-        if (end - start) * 0.02 >= 0.22:
+        end = len(is_speech)
+        if (end - start) * 0.02 >= 0.18:
             segments.append((start * block_size, end * block_size))
 
     return segments, framerate, n_channels, sampwidth, samples
 
-def record_and_split(key, words, duration=3.5):
+def record_and_split(key, words, duration=4.0):
     ensure_dirs()
     temp_wav = os.path.join(OUTPUT_DIR, f"{key}_full.wav")
 
@@ -166,29 +167,47 @@ def record_and_split(key, words, duration=3.5):
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", temp_wav, "-af", "loudnorm", full_target], check=True)
     manifest[key] = f"audio/dad/{key}.wav"
 
+    def save_slice(st, en, filename):
+        chunk_samples = samples[st:en]
+        raw_chunk = struct.pack(f"<{len(chunk_samples)}h", *chunk_samples)
+        part_wav = os.path.join(OUTPUT_DIR, filename)
+        with wave.open(part_wav, 'wb') as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(sampwidth)
+            wf.setframerate(framerate)
+            wf.writeframes(raw_chunk)
+        # Normalize with loudnorm
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", part_wav, "-af", "loudnorm", part_wav + ".tmp.wav"], check=False)
+        if os.path.exists(part_wav + ".tmp.wav"):
+            os.replace(part_wav + ".tmp.wav", part_wav)
+        return part_wav
+
     split_files = []
 
-    # If exactly 3 chunks detected, slice them perfectly!
-    if len(segments) == 3:
-        for idx, (st, en) in enumerate(segments, 1):
-            chunk_samples = samples[st:en]
-            raw_chunk = struct.pack(f"<{len(chunk_samples)}h", *chunk_samples)
-            part_wav = os.path.join(OUTPUT_DIR, f"{key}_{idx}.wav")
-            with wave.open(part_wav, 'wb') as wf:
-                wf.setnchannels(1)
-                wf.setsampwidth(sampwidth)
-                wf.setframerate(framerate)
-                wf.writeframes(raw_chunk)
-            # Loudnorm slice
-            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", part_wav, "-af", "loudnorm", part_wav + ".tmp.wav"], check=False)
-            if os.path.exists(part_wav + ".tmp.wav"):
-                os.replace(part_wav + ".tmp.wav", part_wav)
+    # If 4 or more chunks: Segments before the last 3 form the intro ("A is for..."), last 3 are words!
+    if len(segments) >= 4:
+        intro_st = segments[0][0]
+        intro_en = segments[-4][1]
+        intro_wav = save_slice(intro_st, intro_en, f"{key}_intro.wav")
+        manifest[f"{key}_intro"] = f"audio/dad/{key}_intro.wav"
+        split_files.append(("Intro ('...is for')", intro_wav))
+
+        word_segs = [segments[-3], segments[-2], segments[-1]]
+        for idx, (st, en) in enumerate(word_segs, 1):
+            w_wav = save_slice(st, en, f"{key}_{idx}.wav")
             manifest[f"{key}_{idx}"] = f"audio/dad/{key}_{idx}.wav"
-            split_files.append((words[idx-1], part_wav))
+            split_files.append((words[idx-1], w_wav))
+
+    elif len(segments) == 3:
+        # 3 words without separate intro
+        for idx, (st, en) in enumerate(segments, 1):
+            w_wav = save_slice(st, en, f"{key}_{idx}.wav")
+            manifest[f"{key}_{idx}"] = f"audio/dad/{key}_{idx}.wav"
+            split_files.append((words[idx-1], w_wav))
+
     else:
         # Fallback: assign full take or evenly split
         for idx in range(1, 4):
-            part_wav = os.path.join(OUTPUT_DIR, f"{key}_{idx}.wav")
             manifest[f"{key}_{idx}"] = f"audio/dad/{key}.wav"
         split_files.append((f"Full Take ({len(segments)} chunks detected)", full_target))
 
@@ -202,12 +221,13 @@ def play_file(path):
     if os.path.exists(path):
         subprocess.run(["pw-play", path], check=False)
 
-def interactive_mode(default_dur=3.5):
-    print("=" * 65)
-    print("🎙️  DAD'S VOICE STUDIO: 3-WORD CYCLING RECORDER  👶")
-    print("=" * 65)
-    print("For each key, speak the 3 words with a small natural pause between them.")
-    print("Example for 'A': \"Apple\" (pause) \"Aerodactyl\" (pause) \"Astronaut\"")
+def interactive_mode(default_dur=4.0):
+    print("=" * 68)
+    print("🎙️  DAD'S VOICE STUDIO: '[LETTER] IS FOR...' 4-SECOND RECORDER  👶")
+    print("=" * 68)
+    print("Script for each key:")
+    print("   Say: \"[Letter] is for... [Word 1]... [Word 2]... [Word 3]\"")
+    print("   Example for 'A': \"A is for... Apple... Aerodactyl... Astronaut\"")
     print(f"Recording window: {default_dur} seconds per key.\n")
 
     manifest = load_manifest()
@@ -215,7 +235,7 @@ def interactive_mode(default_dur=3.5):
 
     for i, item in enumerate(VOICE_ITEMS, 1):
         key = item["key"]
-        has_rec = key in manifest
+        has_rec = key in manifest or f"{key}_1" in manifest
         status_icon = "🟢" if has_rec else "⚪"
 
         while True:
@@ -231,12 +251,21 @@ def interactive_mode(default_dur=3.5):
 
             print(f"   🔴 RECORDING ({default_dur}s)... Speak: \"{item['prompt']}\"")
             splits = record_and_split(key, item["words"], duration=default_dur)
-            print("   ⏹️ Done recording! Playing back split words:")
+            print("   ⏹️ Done recording! Playing back split segments:")
 
             for w_name, w_path in splits:
                 print(f"      ▶️ {w_name}...")
                 play_file(w_path)
-                time.sleep(0.15)
+                time.sleep(0.12)
+
+            # If intro exists, simulate the in-game combo!
+            if any("Intro" in name for name, _ in splits) and len(splits) > 1:
+                print("      🔊 Toddler Game Phonics Combo: Intro + Word 1...")
+                intro_path = splits[0][1]
+                word1_path = splits[1][1]
+                play_file(intro_path)
+                time.sleep(0.05)
+                play_file(word1_path)
 
             review = input("   👉 Sound good? [ENTER to keep & continue, 'r' to REDO right now]: ").strip().lower()
             if review == 'r':
@@ -251,7 +280,7 @@ def interactive_mode(default_dur=3.5):
 def main():
     parser = argparse.ArgumentParser(description="Dad Voice Studio with 3-Word Auto-Splitter")
     parser.add_argument("--key", help="Record a specific key (e.g. KeyA, KeyB, Space)")
-    parser.add_argument("--dur", type=float, default=3.5, help="Recording duration in seconds (default: 3.5)")
+    parser.add_argument("--dur", type=float, default=4.0, help="Recording duration in seconds (default: 4.0)")
     parser.add_argument("--clear", action="store_true", help="Clear all recordings to start fresh")
     parser.add_argument("--list", action="store_true", help="List all recordings status")
     args = parser.parse_args()

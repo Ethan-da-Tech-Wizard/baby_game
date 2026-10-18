@@ -1,4 +1,18 @@
 {
   "KeyA": "audio/dad/KeyA.wav",
-  "KeyB": "audio/dad/KeyB.wav"
+  "KeyB": "audio/dad/KeyB.wav",
+  "KeyA_1": "audio/dad/KeyA_1.wav",
+  "KeyA_2": "audio/dad/KeyA_2.wav",
+  "KeyA_3": "audio/dad/KeyA_3.wav",
+  "KeyB_1": "audio/dad/KeyB.wav",
+  "KeyB_2": "audio/dad/KeyB.wav",
+  "KeyB_3": "audio/dad/KeyB.wav",
+  "KeyC": "audio/dad/KeyC.wav",
+  "KeyC_1": "audio/dad/KeyC.wav",
+  "KeyC_2": "audio/dad/KeyC.wav",
+  "KeyC_3": "audio/dad/KeyC.wav",
+  "KeyD": "audio/dad/KeyD.wav",
+  "KeyD_1": "audio/dad/KeyD.wav",
+  "KeyD_2": "audio/dad/KeyD.wav",
+  "KeyD_3": "audio/dad/KeyD.wav"
 }
