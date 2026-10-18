@@ -14,6 +14,27 @@ class SoundEngine {
     this.babySharkTimer = null;
     this.volumeLevel = 0.6;
     this.speechUnlocked = false;
+    this.dadVoiceManifest = {};
+    this.loadDadManifest();
+  }
+
+  loadDadManifest() {
+    fetch('audio/dad/manifest.json')
+      .then(res => res.json())
+      .then(data => {
+        this.dadVoiceManifest = data || {};
+        const count = Object.keys(this.dadVoiceManifest).length;
+        if (count > 0) {
+          const badge = document.getElementById('dad-badge');
+          if (badge) {
+            badge.innerText = `🎙️ Dad's Voice: ${count} Clips!`;
+            badge.classList.add('active');
+          }
+        }
+      })
+      .catch(() => {
+        this.dadVoiceManifest = {};
+      });
   }
 
   init() {
@@ -744,10 +765,30 @@ class SoundEngine {
   }
 
   // ==========================================
-  // 🗣️ TODDLER SPEECH SYNTHESIS ENGINE
+  // 🗣️ TODDLER SPEECH / DAD VOICE ENGINE
   // ==========================================
-  speakWord(text) {
-    if (!('speechSynthesis' in window) || this.isMuted) return;
+  speakWord(text, keyCode) {
+    if (this.isMuted) return;
+
+    // Check if Dad's custom voice file is recorded for this key!
+    if (keyCode && this.dadVoiceManifest && this.dadVoiceManifest[keyCode]) {
+      try {
+        const audio = new Audio(this.dadVoiceManifest[keyCode]);
+        audio.volume = this.volumeLevel;
+        audio.play().catch(() => {
+          this.playSpeechSynthFallback(text);
+        });
+        return;
+      } catch (e) {
+        // Fall back to synth
+      }
+    }
+
+    this.playSpeechSynthFallback(text);
+  }
+
+  playSpeechSynthFallback(text) {
+    if (!('speechSynthesis' in window)) return;
     try {
       window.speechSynthesis.cancel(); // clear queue for instant responsiveness
       const utter = new SpeechSynthesisUtterance(text);

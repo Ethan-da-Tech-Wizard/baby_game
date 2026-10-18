@@ -116,7 +116,7 @@
     if (vocabMap[code]) {
       const item = vocabMap[code];
       effects.showSplashBanner(item.letter, item.word);
-      audio.speakWord(item.word);
+      audio.speakWord(item.word, code);
       item.sound();
       item.fx();
       effects.triggerFlash();
@@ -127,7 +127,7 @@
     if (numberMap[code]) {
       const item = numberMap[code];
       effects.showSplashBanner(item.num, item.name);
-      audio.speakWord(`${item.num}! ${item.name}`);
+      audio.speakWord(`${item.num}! ${item.name}`, code);
       item.sound();
       effects.spawnBouncingBall();
       effects.spawnEmojiBurst(10);
