@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+  <title>👶 Baby Game - Chromebook Toddler Sensory Playground</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FF2A6D">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+</head>
+<body class="theme-dbz">
+  <!-- Screen Shock/Filter Layers -->
+  <div id="crt-overlay" class="overlay-layer"></div>
+  <div id="disco-overlay" class="overlay-layer"></div>
+  <div id="strobe-overlay" class="overlay-layer"></div>
+  <div id="invert-overlay" class="overlay-layer"></div>
+
+  <!-- Primary Render Surface -->
+  <canvas id="game-canvas"></canvas>
+
+  <!-- Big Floating Notification HUD (Letters, Numbers, Words for Toddler) -->
+  <div id="splash-banner" class="hidden">
+    <div id="splash-letter">A</div>
+    <div id="splash-word">APPLE</div>
+  </div>
+
+  <!-- Top Toddler Defense & Quick Controls HUD (Subtle and Toddler-Safe) -->
+  <header id="game-hud">
+    <div class="hud-left">
+      <span class="badge" id="theme-badge">⚡ DBZ Saiyan Aura</span>
+      <span class="badge" id="shark-badge">🦈 Baby Shark: OFF</span>
+      <span class="badge" id="poke-badge">🐹 Dancers: OFF</span>
+    </div>
+    <div class="hud-right">
+      <button id="btn-fullscreen" class="hud-btn" title="Fullscreen (F4)">⛶ Fullscreen</button>
+      <button id="btn-shark" class="hud-btn" title="Baby Shark Song (T)">🦈 Shark Song</button>
+      <button id="btn-poke" class="hud-btn" title="Dance Party (P)">🐹 Dance Party</button>
+      <button id="btn-theme" class="hud-btn" title="Next Anime Theme (Tab)">🎌 Next Theme</button>
+      <button id="btn-clear" class="hud-btn danger" title="Clear Screen (Esc)">🧹 Clear</button>
+    </div>
+  </header>
+
+  <!-- Start / Unlock Modal for Audio (Browser Autoplay Policy) -->
+  <div id="start-overlay" class="overlay-screen active">
+    <div class="start-card">
+      <div class="mascot-bounce">👶 🎮 ⚡</div>
+      <h1>BABY GAME!</h1>
+      <p class="subtitle">Chromebook Sensory Playground for Little Champions</p>
+      <p class="desc">Press any key or tap anywhere to start the party!</p>
+      <button id="btn-start" class="start-btn">TAP TO PLAY! 🚀</button>
+      <div class="quick-hints">
+        <span>🦈 Press <b>T</b> for Baby Shark</span>
+        <span>🐹 Press <b>P</b> for Dancing Pokémon</span>
+        <span>🎌 Press <b>Tab</b> for Anime Backgrounds</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="audio.js"></script>
+  <script src="anime.js"></script>
+  <script src="effects.js"></script>
+  <script src="keys.js"></script>
+  <script>
+    // Register Service Worker for 100% Offline Chromebook Play
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
