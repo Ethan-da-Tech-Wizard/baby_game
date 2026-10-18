@@ -35,7 +35,7 @@ VOICE_ITEMS = [
     {"key": "KeyG", "title": "G", "words": ["Galaxy", "Giraffe", "Guitar"], "prompt": "G is for... Galaxy! Giraffe! Guitar!"},
     {"key": "KeyH", "title": "H", "words": ["Heart", "Horse", "Helicopter"], "prompt": "H is for... Heart! Horse! Helicopter!"},
     {"key": "KeyI", "title": "I", "words": ["Ice Cream", "Igloo", "Island"], "prompt": "I is for... Ice Cream! Igloo! Island!"},
-    {"key": "KeyJ", "title": "J", "words": ["Togepi", "Jump", "Juice"], "prompt": "J is for... Togepi! Jump! Juice!"},
+    {"key": "KeyJ", "title": "J", "words": ["Jellyfish", "Jump", "Juice"], "prompt": "J is for... Jellyfish! Jump! Juice!"},
     {"key": "KeyK", "title": "K", "words": ["Kangaskhan", "Kite", "Koala"], "prompt": "K is for... Kangaskhan! Kite! Koala!"},
     {"key": "KeyL", "title": "L", "words": ["Lion", "Lightning", "Lollipop"], "prompt": "L is for... Lion! Lightning! Lollipop!"},
     {"key": "KeyM", "title": "M", "words": ["Monkey", "Moon", "Music"], "prompt": "M is for... Monkey! Moon! Music!"},
@@ -49,20 +49,20 @@ VOICE_ITEMS = [
     {"key": "KeyU", "title": "U", "words": ["Unicorn", "Umbrella", "UFO"], "prompt": "U is for... Unicorn! Umbrella! UFO!"},
     {"key": "KeyV", "title": "V", "words": ["Venusaur", "Victory", "Volcano"], "prompt": "V is for... Venusaur! Victory! Volcano!"},
     {"key": "KeyW", "title": "W", "words": ["Water", "Whale", "Wind"], "prompt": "W is for... Water! Whale! Wind!"},
-    {"key": "KeyX", "title": "X", "words": ["Xylophone", "X-Ray", "Treasure"], "prompt": "X is for... Xylophone! X-Ray! Treasure!"},
-    {"key": "KeyY", "title": "Y", "words": ["Donut", "Yoyo", "Yacht"], "prompt": "Y is for... Donut! Yoyo! Yacht!"},
+    {"key": "KeyX", "title": "X", "words": ["Xylophone", "X-Ray", "X Marks The Spot"], "prompt": "X is for... Xylophone! X-Ray! X Marks The Spot!"},
+    {"key": "KeyY", "title": "Y", "words": ["Yak", "Yoyo", "Yacht"], "prompt": "Y is for... Yak! Yoyo! Yacht!"},
     {"key": "KeyZ", "title": "Z", "words": ["Zigzagoon", "Zebra", "Zap"], "prompt": "Z is for... Zigzagoon! Zebra! Zap!"},
-    # Numbers (1-0)
-    {"key": "Digit1", "title": "1", "words": ["One", "Dino", "Uno"], "prompt": "1 is for... One! Dino! Uno!"},
-    {"key": "Digit2", "title": "2", "words": ["Two", "Puppy", "Dogs"], "prompt": "2 is for... Two! Puppy! Dogs!"},
-    {"key": "Digit3", "title": "3", "words": ["Three", "Cats", "Kittens"], "prompt": "3 is for... Three! Cats! Kittens!"},
-    {"key": "Digit4", "title": "4", "words": ["Four", "Ducks", "Quack"], "prompt": "4 is for... Four! Ducks! Quack!"},
-    {"key": "Digit5", "title": "5", "words": ["Five", "Lions", "Roar"], "prompt": "5 is for... Five! Lions! Roar!"},
-    {"key": "Digit6", "title": "6", "words": ["Six", "Frogs", "Ribbit"], "prompt": "6 is for... Six! Frogs! Ribbit!"},
-    {"key": "Digit7", "title": "7", "words": ["Seven", "Cows", "Moo"], "prompt": "7 is for... Seven! Cows! Moo!"},
-    {"key": "Digit8", "title": "8", "words": ["Eight", "Sheep", "Baa"], "prompt": "8 is for... Eight! Sheep! Baa!"},
-    {"key": "Digit9", "title": "9", "words": ["Nine", "Elephants", "Stomp"], "prompt": "9 is for... Nine! Elephants! Stomp!"},
-    {"key": "Digit0", "title": "10", "words": ["Ten", "Birds", "Chirp"], "prompt": "10 is for... Ten! Birds! Chirp!"},
+    # Numbers (1-0) - Toddler Animal Phonics & Sounds
+    {"key": "Digit1", "title": "1 (Dino)", "words": ["One", "Dino", "Roar"], "prompt": "1 is for... One! Dino! Roar!"},
+    {"key": "Digit2", "title": "2 (Dogs)", "words": ["Two", "Dog", "Woof"], "prompt": "2 is for... Two! Dog! Woof!"},
+    {"key": "Digit3", "title": "3 (Cats)", "words": ["Three", "Cat", "Meow"], "prompt": "3 is for... Three! Cat! Meow!"},
+    {"key": "Digit4", "title": "4 (Ducks)", "words": ["Four", "Duck", "Quack"], "prompt": "4 is for... Four! Duck! Quack!"},
+    {"key": "Digit5", "title": "5 (Lions)", "words": ["Five", "Lion", "Roar"], "prompt": "5 is for... Five! Lion! Roar!"},
+    {"key": "Digit6", "title": "6 (Frogs)", "words": ["Six", "Frog", "Ribbit"], "prompt": "6 is for... Six! Frog! Ribbit!"},
+    {"key": "Digit7", "title": "7 (Cows)", "words": ["Seven", "Cow", "Moo"], "prompt": "7 is for... Seven! Cow! Moo!"},
+    {"key": "Digit8", "title": "8 (Sheep)", "words": ["Eight", "Sheep", "Baa"], "prompt": "8 is for... Eight! Sheep! Baa!"},
+    {"key": "Digit9", "title": "9 (Elephants)", "words": ["Nine", "Elephant", "Trumpet"], "prompt": "9 is for... Nine! Elephant! Trumpet!"},
+    {"key": "Digit0", "title": "10 (Birds)", "words": ["Ten", "Bird", "Chirp"], "prompt": "10 is for... Ten! Bird! Chirp!"},
     # Specials
     {"key": "Space", "title": "Space", "words": ["Party", "Woohoo", "Celebrate"], "prompt": "Space is for... Party! Woohoo! Celebrate!"},
     {"key": "Enter", "title": "Enter", "words": ["Earthquake", "Boom", "Explosion"], "prompt": "Enter is for... Earthquake! Boom! Explosion!"}
@@ -221,7 +221,7 @@ def play_file(path):
     if os.path.exists(path):
         subprocess.run(["pw-play", path], check=False)
 
-def interactive_mode(default_dur=4.0):
+def interactive_mode(default_dur=4.0, filter_items=None, start_key=None):
     print("=" * 68)
     print("🎙️  DAD'S VOICE STUDIO: '[LETTER] IS FOR...' 4-SECOND RECORDER  👶")
     print("=" * 68)
@@ -231,9 +231,15 @@ def interactive_mode(default_dur=4.0):
     print(f"Recording window: {default_dur} seconds per key.\n")
 
     manifest = load_manifest()
-    total = len(VOICE_ITEMS)
+    items = filter_items if filter_items is not None else VOICE_ITEMS
 
-    for i, item in enumerate(VOICE_ITEMS, 1):
+    if start_key:
+        start_idx = next((i for i, x in enumerate(items) if x["key"].lower() == start_key.lower()), 0)
+        items = items[start_idx:]
+
+    total = len(items)
+
+    for i, item in enumerate(items, 1):
         key = item["key"]
         has_rec = key in manifest or f"{key}_1" in manifest
         status_icon = "🟢" if has_rec else "⚪"
@@ -279,7 +285,10 @@ def interactive_mode(default_dur=4.0):
 
 def main():
     parser = argparse.ArgumentParser(description="Dad Voice Studio with 3-Word Auto-Splitter")
-    parser.add_argument("--key", help="Record a specific key (e.g. KeyA, KeyB, Space)")
+    parser.add_argument("--key", help="Record a specific key (e.g. KeyJ, KeyA, Space)")
+    parser.add_argument("--start", help="Start recording from a specific key (e.g. KeyJ)")
+    parser.add_argument("--animals", action="store_true", help="Record KeyJ and the 1-10 Animal Noises")
+    parser.add_argument("--missing", action="store_true", help="Only record keys that haven't been recorded yet")
     parser.add_argument("--dur", type=float, default=4.0, help="Recording duration in seconds (default: 4.0)")
     parser.add_argument("--clear", action="store_true", help="Clear all recordings to start fresh")
     parser.add_argument("--list", action="store_true", help="List all recordings status")
@@ -303,26 +312,52 @@ def main():
         print(f"\n📋 Dad Voice Recordings ({len(manifest)} clips mapped):")
         for item in VOICE_ITEMS:
             key = item["key"]
-            status = "✅ RECORDED" if key in manifest else "❌ MISSING"
+            status = "✅ RECORDED" if (key in manifest or f"{key}_1" in manifest) else "❌ MISSING"
             print(f"  {key:8} {item['title']:12} -> {', '.join(item['words']):35} {status}")
         return
 
     if args.key:
         matched = next((x for x in VOICE_ITEMS if x["key"].lower() == args.key.lower()), None)
         if matched:
-            print(f"\n🎙️ Recording {matched['title']}: \"{matched['prompt']}\"")
-            input(f"   Press [ENTER] to record ({args.dur}s)...")
-            print(f"   🔴 RECORDING ({args.dur}s)... Speak: \"{matched['prompt']}\"")
-            splits = record_and_split(matched["key"], matched["words"], duration=args.dur)
-            print("   ⏹️ Done! Playing back:")
-            for w_name, w_path in splits:
-                print(f"      ▶️ {w_name}...")
-                play_file(w_path)
+            while True:
+                print(f"\n🎙️ Recording {matched['title']}: \"{matched['prompt']}\"")
+                input(f"   Press [ENTER] to record ({args.dur}s)...")
+                print(f"   🔴 RECORDING ({args.dur}s)... Speak: \"{matched['prompt']}\"")
+                splits = record_and_split(matched["key"], matched["words"], duration=args.dur)
+                print("   ⏹️ Done! Playing back:")
+                for w_name, w_path in splits:
+                    print(f"      ▶️ {w_name}...")
+                    play_file(w_path)
+                    time.sleep(0.12)
+                if any("Intro" in name for name, _ in splits) and len(splits) > 1:
+                    print("      🔊 Toddler Game Combo Preview:")
+                    play_file(splits[0][1])
+                    time.sleep(0.05)
+                    play_file(splits[1][1])
+                review = input("   👉 Sound good? [ENTER to save & exit, 'r' to REDO]: ").strip().lower()
+                if review == 'r':
+                    continue
+                else:
+                    print("   ✅ Saved to game!")
+                    break
         else:
             print(f"Unknown key: {args.key}")
         return
 
-    interactive_mode(default_dur=args.dur)
+    if args.animals:
+        # User requested: KeyJ followed by the Animal Noises (Digit1-Digit0)
+        target_keys = ["KeyJ", "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9", "Digit0"]
+        items = [x for x in VOICE_ITEMS if x["key"] in target_keys]
+        interactive_mode(default_dur=args.dur, filter_items=items)
+        return
+
+    if args.missing:
+        manifest = load_manifest()
+        items = [x for x in VOICE_ITEMS if (x["key"] not in manifest and f"{x['key']}_1" not in manifest)]
+        interactive_mode(default_dur=args.dur, filter_items=items)
+        return
+
+    interactive_mode(default_dur=args.dur, start_key=args.start)
 
 if __name__ == "__main__":
     main()

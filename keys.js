@@ -65,7 +65,7 @@
       { letter: 'I', word: 'ISLAND 🏝️', emoji: '🏝️', img: null, sound: () => audio.playDuckQuack(), fx: () => effects.cycleRainStorm() }
     ],
     KeyJ: [
-      { letter: 'J', word: 'TOGEPI 🐣', emoji: null, img: 'images/pokemon/togepi.png', sound: () => audio.playChimeFanfare(), fx: () => effects.spawnConfetti(250) },
+      { letter: 'J', word: 'JELLYFISH 🪼', emoji: '🪼', img: null, sound: () => audio.playSlideWhistle(), fx: () => effects.spawnBubble() },
       { letter: 'J', word: 'JUMP 🦘', emoji: '🦘', img: null, sound: () => audio.playBoing(), fx: () => effects.spawnBouncingBall() },
       { letter: 'J', word: 'JUICE 🧃', emoji: '🧃', img: null, sound: () => audio.playSlideWhistle(), fx: () => effects.spawnBubble() }
     ],
@@ -137,10 +137,10 @@
     KeyX: [
       { letter: 'X', word: 'XYLOPHONE 🎵', emoji: '🎵', img: null, sound: () => audio.playChimeFanfare(), fx: () => effects.toggleCRTScanlines() },
       { letter: 'X', word: 'X-RAY 🩻', emoji: '🩻', img: null, sound: () => audio.playLaser(), fx: () => effects.toggleInvertColors() },
-      { letter: 'X', word: 'TREASURE ❌', emoji: '🏴‍☠️', img: null, sound: () => audio.playLevelUp(), fx: () => effects.spawnFireworks() }
+      { letter: 'X', word: 'X MARKS THE SPOT ❌', emoji: '🏴‍☠️', img: null, sound: () => audio.playLevelUp(), fx: () => effects.spawnFireworks() }
     ],
     KeyY: [
-      { letter: 'Y', word: 'YUMMY DONUT 🍩', emoji: '🍩', img: null, sound: () => audio.playPartyHorn(), fx: () => effects.spawnCandyRain(35) },
+      { letter: 'Y', word: 'YAK 🐂', emoji: '🐂', img: null, sound: () => audio.playCowMoo(), fx: () => effects.spawnEmojiBurst(15) },
       { letter: 'Y', word: 'YOYO 🪀', emoji: '🪀', img: null, sound: () => audio.playBoing(), fx: () => effects.spawnBouncingBall() },
       { letter: 'Y', word: 'YACHT ⛵', emoji: '⛵', img: null, sound: () => audio.playDuckQuack(), fx: () => effects.cycleRainStorm() }
     ],
