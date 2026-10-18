@@ -767,13 +767,17 @@ class SoundEngine {
   // ==========================================
   // 🗣️ TODDLER SPEECH / DAD VOICE ENGINE
   // ==========================================
-  speakWord(text, keyCode) {
+  speakWord(text, keyCode, cycleIdx = 0) {
     if (this.isMuted) return;
 
-    // Check if Dad's custom voice file is recorded for this key!
-    if (keyCode && this.dadVoiceManifest && this.dadVoiceManifest[keyCode]) {
+    // Check if Dad's custom voice file is recorded for this specific cycle word or general key!
+    const partKey = `${keyCode}_${cycleIdx + 1}`;
+    const clipPath = (this.dadVoiceManifest && this.dadVoiceManifest[partKey]) ||
+                     (this.dadVoiceManifest && this.dadVoiceManifest[keyCode]);
+
+    if (clipPath) {
       try {
-        const audio = new Audio(this.dadVoiceManifest[keyCode]);
+        const audio = new Audio(clipPath);
         audio.volume = this.volumeLevel;
         audio.play().catch(() => {
           this.playSpeechSynthFallback(text);
