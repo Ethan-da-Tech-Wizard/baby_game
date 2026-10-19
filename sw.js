@@ -1,4 +1,4 @@
-const CACHE_NAME = 'baby-game-v2';
+const CACHE_NAME = 'baby-game-v3';
 const ASSETS = [
   './',
   'index.html',
@@ -10,6 +10,7 @@ const ASSETS = [
   'keys.js',
   'manifest.json',
   'icon.svg',
+  'audio/dad/manifest.json',
   'images/pokemon/pikachu.png',
   'images/pokemon/charizard.png',
   'images/pokemon/blastoise.png',
@@ -49,7 +50,17 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
-      return cachedResponse || fetch(e.request);
+      if (cachedResponse) return cachedResponse;
+      return fetch(e.request).then((response) => {
+        if (!response || response.status !== 200) {
+          return response;
+        }
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(e.request, responseToCache);
+        });
+        return response;
+      }).catch(() => cachedResponse);
     })
   );
 });
