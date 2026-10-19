@@ -165,5 +165,18 @@
   "KeyY_intro": "audio/dad/KeyY_intro.wav",
   "Digit0_intro": "audio/dad/Digit0_intro.wav",
   "Space_intro": "audio/dad/Space_intro.wav",
-  "Enter_intro": "audio/dad/Enter_intro.wav"
+  "Enter_intro": "audio/dad/Enter_intro.wav",
+  "KeyA_intro": "audio/dad/KeyA_intro.wav",
+  "KeyB_intro": "audio/dad/KeyB_intro.wav",
+  "KeyC_intro": "audio/dad/KeyC_intro.wav",
+  "KeyD_intro": "audio/dad/KeyD_intro.wav",
+  "KeyE_intro": "audio/dad/KeyE_intro.wav",
+  "KeyG_intro": "audio/dad/KeyG_intro.wav",
+  "KeyH_intro": "audio/dad/KeyH_intro.wav",
+  "KeyI_intro": "audio/dad/KeyI_intro.wav",
+  "KeyJ_intro": "audio/dad/KeyJ_intro.wav",
+  "KeyK_intro": "audio/dad/KeyK_intro.wav",
+  "KeyO_intro": "audio/dad/KeyO_intro.wav",
+  "KeyS_intro": "audio/dad/KeyS_intro.wav",
+  "Digit9_intro": "audio/dad/Digit9_intro.wav"
 }
