@@ -151,18 +151,58 @@
     ]
   };
 
-  // Numbers 1-0 Map with Emojis
+  // Numbers 1-0 Map with Emojis (3-item cycling with Dad Voice & animal phonics)
   const numberMap = {
-    Digit1: { num: '1', name: 'ONE DINO 🦖', emoji: '🦖', sound: () => audio.playDinoRoar() },
-    Digit2: { num: '2', name: 'TWO DOGS 🐶🐶', emoji: '🐶', sound: () => audio.playDogBark() },
-    Digit3: { num: '3', name: 'THREE CATS 🐱🐱🐱', emoji: '🐱', sound: () => audio.playCatMeow() },
-    Digit4: { num: '4', name: 'FOUR DUCKS 🦆🦆🦆🦆', emoji: '🦆', sound: () => audio.playDuckQuack() },
-    Digit5: { num: '5', name: 'FIVE LIONS 🦁🦁🦁🦁🦁', emoji: '🦁', sound: () => audio.playLionRoar() },
-    Digit6: { num: '6', name: 'SIX FROGS 🐸🐸🐸🐸🐸🐸', emoji: '🐸', sound: () => audio.playFrogRibbit() },
-    Digit7: { num: '7', name: 'SEVEN COWS 🐮🐮🐮🐮🐮🐮🐮', emoji: '🐮', sound: () => audio.playCowMoo() },
-    Digit8: { num: '8', name: 'EIGHT SHEEP 🐑🐑🐑🐑🐑🐑🐑🐑', emoji: '🐑', sound: () => audio.playSheepBaa() },
-    Digit9: { num: '9', name: 'NINE ELEPHANTS 🐘🐘🐘🐘🐘🐘🐘🐘🐘', emoji: '🐘', sound: () => audio.playElephantTrumpet() },
-    Digit0: { num: '10', name: 'TEN BIRDS 🐦🐦🐦🐦🐦🐦🐦🐦🐦🐦', emoji: '🐦', sound: () => audio.playBirdChirp() }
+    Digit1: [
+      { num: '1', name: 'ONE DINO 🦖', emoji: '🦖', sound: () => audio.playDinoRoar(), fx: () => effects.spawnBouncingBall() },
+      { num: '1', name: 'DINO 🦕', emoji: '🦕', sound: () => audio.playDinoRoar(), fx: () => effects.triggerScreenShake(true) },
+      { num: '1', name: 'ROAR! 🦖', emoji: '🦖', sound: () => audio.playBoom(), fx: () => effects.spawnEmojiBurst(20) }
+    ],
+    Digit2: [
+      { num: '2', name: 'TWO DOGS 🐶', emoji: '🐶', sound: () => audio.playDogBark(), fx: () => effects.spawnEmojiBurst(15) },
+      { num: '2', name: 'DOG 🐕', emoji: '🐕', sound: () => audio.playDogBark(), fx: () => effects.spawnBouncingBall() },
+      { num: '2', name: 'WOOF WOOF! 🐾', emoji: '🐾', sound: () => audio.playDogBark(), fx: () => effects.spawnConfetti(200) }
+    ],
+    Digit3: [
+      { num: '3', name: 'THREE CATS 🐱', emoji: '🐱', sound: () => audio.playCatMeow(), fx: () => effects.spawnEmojiBurst(15) },
+      { num: '3', name: 'CAT 🐈', emoji: '🐈', sound: () => audio.playCatMeow(), fx: () => effects.spawnBubble() },
+      { num: '3', name: 'MEOW MEOW! 🐾', emoji: '🐾', sound: () => audio.playCatMeow(), fx: () => effects.toggleFloatingHearts() }
+    ],
+    Digit4: [
+      { num: '4', name: 'FOUR DUCKS 🦆', emoji: '🦆', sound: () => audio.playDuckQuack(), fx: () => effects.spawnBubble() },
+      { num: '4', name: 'DUCK 🦆', emoji: '🦆', sound: () => audio.playDuckQuack(), fx: () => effects.cycleRainStorm() },
+      { num: '4', name: 'QUACK QUACK! 🦆', emoji: '🦆', sound: () => audio.playDuckQuack(), fx: () => effects.spawnConfetti(200) }
+    ],
+    Digit5: [
+      { num: '5', name: 'FIVE LIONS 🦁', emoji: '🦁', sound: () => audio.playLionRoar(), fx: () => effects.spawnFireworks() },
+      { num: '5', name: 'LION 🦁', emoji: '🦁', sound: () => audio.playLionRoar(), fx: () => effects.triggerFlash() },
+      { num: '5', name: 'ROAAAR! 🦁', emoji: '🦁', sound: () => audio.playLionRoar(), fx: () => effects.triggerScreenShake(true) }
+    ],
+    Digit6: [
+      { num: '6', name: 'SIX FROGS 🐸', emoji: '🐸', sound: () => audio.playFrogRibbit(), fx: () => effects.spawnBouncingBall() },
+      { num: '6', name: 'FROG 🐸', emoji: '🐸', sound: () => audio.playFrogRibbit(), fx: () => effects.spawnBubble() },
+      { num: '6', name: 'RIBBIT RIBBIT! 🐸', emoji: '🐸', sound: () => audio.playFrogRibbit(), fx: () => effects.spawnEmojiBurst(20) }
+    ],
+    Digit7: [
+      { num: '7', name: 'SEVEN COWS 🐮', emoji: '🐮', sound: () => audio.playCowMoo(), fx: () => effects.spawnEmojiBurst(15) },
+      { num: '7', name: 'COW 🐮', emoji: '🐮', sound: () => audio.playCowMoo(), fx: () => effects.spawnCandyRain(25) },
+      { num: '7', name: 'MOOO! 🐮', emoji: '🐮', sound: () => audio.playCowMoo(), fx: () => effects.spawnConfetti(200) }
+    ],
+    Digit8: [
+      { num: '8', name: 'EIGHT SHEEP 🐑', emoji: '🐑', sound: () => audio.playSheepBaa(), fx: () => effects.spawnBubble() },
+      { num: '8', name: 'SHEEP 🐑', emoji: '🐑', sound: () => audio.playSheepBaa(), fx: () => effects.toggleFloatingHearts() },
+      { num: '8', name: 'BAAA! 🐑', emoji: '🐑', sound: () => audio.playSheepBaa(), fx: () => effects.spawnConfetti(200) }
+    ],
+    Digit9: [
+      { num: '9', name: 'NINE ELEPHANTS 🐘', emoji: '🐘', sound: () => audio.playElephantTrumpet(), fx: () => effects.spawnBouncingBall() },
+      { num: '9', name: 'ELEPHANT 🐘', emoji: '🐘', sound: () => audio.playElephantTrumpet(), fx: () => effects.triggerScreenShake(true) },
+      { num: '9', name: 'PAWOOO! 🐘', emoji: '🐘', sound: () => audio.playElephantTrumpet(), fx: () => effects.spawnFireworks() }
+    ],
+    Digit0: [
+      { num: '10', name: 'TEN BIRDS 🐦', emoji: '🐦', sound: () => audio.playBirdChirp(), fx: () => effects.spawnBubble() },
+      { num: '10', name: 'BIRD 🐦', emoji: '🐦', sound: () => audio.playBirdChirp(), fx: () => effects.spawnEmojiBurst(25) },
+      { num: '10', name: 'CHIRP CHIRP! 🐦', emoji: '🐦', sound: () => audio.playBirdChirp(), fx: () => effects.spawnConfetti(250) }
+    ]
   };
 
   // Update HUD Badges
@@ -235,14 +275,17 @@
       return;
     }
 
-    // 2. Numbers 1 - 0
+    // 2. Numbers 1 - 0 (Cycles through 3 distinct animal items per number!)
     if (numberMap[code]) {
-      const item = numberMap[code];
+      const list = numberMap[code];
+      const curIdx = cycleState[code] || 0;
+      const item = list[curIdx % list.length];
+      cycleState[code] = (curIdx + 1) % list.length;
+
       effects.showSplashBanner(item.num, item.name, null, item.emoji);
-      audio.speakWord(`${item.num}! ${item.name}`, code);
+      audio.speakWord(item.name, code, curIdx % list.length);
       item.sound();
-      effects.spawnBouncingBall();
-      effects.spawnEmojiBurst(10);
+      item.fx();
       effects.triggerFlash();
       return;
     }
@@ -364,24 +407,38 @@
         effects.showSplashBanner('🌀', 'COLOR INVERT!');
         break;
 
-      case 'Enter':
-        effects.triggerScreenShake(true);
-        effects.triggerFlash();
-        effects.spawnFireworks();
-        effects.spawnConfetti(350);
-        audio.playBoom();
-        effects.showSplashBanner('💥', 'EARTHQUAKE!');
-        break;
+      case 'Enter': {
+        const enterList = [
+          { word: 'EARTHQUAKE 💥', emoji: '💥', fx: () => { effects.triggerScreenShake(true); audio.playBoom(); } },
+          { word: 'BOOM 💣', emoji: '💣', fx: () => { effects.triggerFlash(); effects.spawnFireworks(); audio.playBoom(); } },
+          { word: 'EXPLOSION 🌋', emoji: '🌋', fx: () => { effects.triggerScreenShake(true); effects.spawnConfetti(350); audio.playBoom(); } }
+        ];
+        const eIdx = cycleState['Enter'] || 0;
+        const eItem = enterList[eIdx % enterList.length];
+        cycleState['Enter'] = (eIdx + 1) % enterList.length;
 
-      case 'Space':
-        effects.spawnFireworks();
-        effects.spawnConfetti(300);
-        effects.spawnEmojiBurst(30);
-        effects.spawnCandyRain(20);
-        effects.triggerScreenShake(true);
-        audio.playPartyHorn();
-        effects.showSplashBanner('🎉', 'BIG PARTY!');
+        eItem.fx();
+        effects.showSplashBanner(eItem.emoji, eItem.word);
+        audio.speakWord(eItem.word, 'Enter', eIdx % enterList.length);
         break;
+      }
+
+      case 'Space': {
+        const spaceList = [
+          { word: 'PARTY 🎉', emoji: '🎉', fx: () => { effects.spawnFireworks(); audio.playPartyHorn(); } },
+          { word: 'WOOHOO 🥳', emoji: '🥳', fx: () => { effects.spawnCandyRain(25); audio.playPartyHorn(); } },
+          { word: 'CELEBRATE 🎊', emoji: '🎊', fx: () => { effects.spawnConfetti(300); effects.spawnEmojiBurst(30); audio.playLevelUp(); } }
+        ];
+        const sIdx = cycleState['Space'] || 0;
+        const sItem = spaceList[sIdx % spaceList.length];
+        cycleState['Space'] = (sIdx + 1) % spaceList.length;
+
+        effects.triggerScreenShake(false);
+        sItem.fx();
+        effects.showSplashBanner(sItem.emoji, sItem.word);
+        audio.speakWord(sItem.word, 'Space', sIdx % spaceList.length);
+        break;
+      }
 
       case 'ShiftLeft':
       case 'ShiftRight':
