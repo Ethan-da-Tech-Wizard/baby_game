@@ -1,7 +1,9 @@
 /**
- * Baby Game Keyboard & Input Controller
- * Complete Chromebook Keyboard Mapping (80+ Keys) + Multi-Touch Sensor
- * Toddler-Proof Navigation Defense & Instant Audiovisual Feedback
+ * Program: Baby Game Keyboard & Touch Controller
+ * Programmer: The Maintainer
+ * Last Modified: 11/08/2026
+ * Purpose: Complete Chromebook keyboard mapping (80+ keys) + multi-touch sensor with
+ *          toddler-proof navigation defense and instant audiovisual feedback.
  */
 
 (() => {

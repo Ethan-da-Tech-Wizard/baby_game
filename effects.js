@@ -1,6 +1,8 @@
 /**
- * Baby Game Screen Effects Engine
- * Massive visual transformations, particle engines, and ambient layer manager
+ * Program: Baby Game Screen Effects Engine
+ * Programmer: The Maintainer
+ * Last Modified: 11/08/2026
+ * Purpose: Canvas-based visual transformations, particle engines, and ambient layer manager.
  */
 
 class EffectsEngine {

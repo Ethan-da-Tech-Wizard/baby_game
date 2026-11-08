@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """
-🎙️ Dad's Voice Studio for Baby Game (with 3-Word Auto-Splitter!)
-Record 3 words per key (e.g., "Apple! Aerodactyl! Astronaut!").
-The script automatically detects pauses, slices each word into separate clips:
-  - KeyA_1.wav (Word 1)
-  - KeyA_2.wav (Word 2)
-  - KeyA_3.wav (Word 3)
-And puts them directly into the game for your toddler!
+Program: Dad's Voice Studio & Audio Splitter
+Programmer: The Maintainer
+Last Modified: 11/08/2026
+Purpose: Automated voice recording and intelligent speech pause-detection pipeline
+         for Baby Game, slicing 3-word vocabulary prompts into distinct WAV audio files.
 """
 
 import os
@@ -19,11 +17,12 @@ import struct
 import subprocess
 import argparse
 
+## Resolve local script directory and relative audio storage paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(SCRIPT_DIR, "audio", "dad")
 MANIFEST_PATH = os.path.join(OUTPUT_DIR, "manifest.json")
 
-# 3-Word Prompts matching the 3-item cycling game engine
+## 3-Word Prompts matching the 3-item cycling game engine
 VOICE_ITEMS = [
     # Letters (A-Z) - Workflow: "[Letter] is for... [Word 1]... [Word 2]... [Word 3]"
     {"key": "KeyA", "title": "A", "words": ["Apple", "Aerodactyl", "Astronaut"], "prompt": "A is for... Apple! Aerodactyl! Astronaut!"},
@@ -87,6 +86,7 @@ def save_manifest(manifest):
 
 def detect_speech_segments(wav_path):
     """Detect pauses and return list of (start_sample, end_sample)."""
+    ## Open WAV audio stream and extract low-level framing parameters
     with wave.open(wav_path, 'rb') as wf:
         n_channels = wf.getnchannels()
         sampwidth = wf.getsampwidth()
@@ -94,12 +94,14 @@ def detect_speech_segments(wav_path):
         n_frames = wf.getnframes()
         raw = wf.readframes(n_frames)
 
+    ## Unpack 16-bit little-endian binary PCM audio frames into signed integer samples
     fmt = f"<{n_frames * n_channels}h"
     samples = struct.unpack(fmt, raw)
     if n_channels == 2:
-        samples = samples[0::2]
+        samples = samples[0::2]  ## Flatten stereo down to mono by dropping channel 2
 
-    block_size = int(framerate * 0.02) # 20ms
+    ## Compute Root-Mean-Square (RMS) signal energy across 20ms analysis blocks
+    block_size = int(framerate * 0.02)  ## 20ms block size
     energies = []
     for i in range(0, len(samples), block_size):
         chunk = samples[i:i+block_size]
@@ -107,32 +109,35 @@ def detect_speech_segments(wav_path):
         rms = math.sqrt(sum(s*s for s in chunk) / len(chunk))
         energies.append(rms)
 
+    ## Establish dynamic speech threshold relative to signal peak (with fixed floor)
     max_e = max(energies) if energies else 1
     threshold = max(160.0, max_e * 0.12)
     is_speech = [e > threshold for e in energies]
 
+    ## Segment detection state machine applying hysteresis and pause durations
     segments = []
     in_seg = False
     start = 0
     silence_count = 0
-    min_silence_blocks = int(0.14 / 0.02) # 140ms pause between chunks
+    min_silence_blocks = int(0.14 / 0.02)  ## 140ms pause between words triggers a boundary
 
     for idx, sp in enumerate(is_speech):
         if sp:
             if not in_seg:
-                start = max(0, idx - 2)
+                start = max(0, idx - 2)  ## Add 40ms pre-roll pad to capture plosives
                 in_seg = True
             silence_count = 0
         else:
             if in_seg:
                 silence_count += 1
                 if silence_count >= min_silence_blocks:
-                    end = min(len(is_speech), idx - silence_count + 3)
-                    if (end - start) * 0.02 >= 0.18:
+                    end = min(len(is_speech), idx - silence_count + 3)  ## Add 60ms post-roll pad
+                    if (end - start) * 0.02 >= 0.18:  ## Enforce 180ms minimum duration to discard clicks
                         segments.append((start * block_size, end * block_size))
                     in_seg = False
                     silence_count = 0
 
+    ## Capture trailing speech segment if audio ends while speaking
     if in_seg:
         end = len(is_speech)
         if (end - start) * 0.02 >= 0.18:

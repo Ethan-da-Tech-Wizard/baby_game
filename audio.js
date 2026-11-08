@@ -1,7 +1,9 @@
 /**
- * Baby Game Audio Engine
- * 100% Procedural Web Audio API & SpeechSynthesis
- * Zero external asset dependencies - works completely offline!
+ * Program: Baby Game Procedural Audio Engine
+ * Programmer: The Maintainer
+ * Last Modified: 11/08/2026
+ * Purpose: 100% Procedural Web Audio API sound synthesis and SpeechSynthesis management.
+ *          Zero external asset dependencies - works completely offline!
  */
 
 class SoundEngine {

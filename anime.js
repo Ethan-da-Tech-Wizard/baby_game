@@ -1,7 +1,9 @@
 /**
- * Baby Game Anime & Pokémon Troupe Engine
- * High-performance vector rendering for anime backdrops & dancing characters
- * Toddler-safe: Heroic action, energetic animations, strictly zero violence/nudity
+ * Program: Baby Game Anime & Pokémon Troupe Engine
+ * Programmer: The Maintainer
+ * Last Modified: 11/08/2026
+ * Purpose: High-performance vector rendering for anime backdrops & dancing characters.
+ *          Toddler-safe: Heroic action, energetic animations, strictly zero violence/nudity.
  */
 
 class AnimeBackdropEngine {
