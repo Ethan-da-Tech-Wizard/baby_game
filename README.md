@@ -64,3 +64,11 @@ Every single key on the keyboard does something drastically different across the
 
 ## 🛠️ Architecture & Cycle
 Developed following the complete **Analysis -> Design -> Build -> Production -> Support** cycle. See [ANALYSIS_AND_DESIGN.md](ANALYSIS_AND_DESIGN.md) for the full 80-key mapping matrix and audio synthesizer algorithms.
+
+## Voice clips omitted
+
+The recorded voice clips (`audio/dad/*.wav`) are personal recordings and are not
+included in this repository. `audio/dad/manifest.json` is intentionally empty, and
+the game falls back to its built-in synthesized speech. To use your own voice, run
+`python3 record_dad.py`, which records and slices clips into `audio/dad/` and writes
+the manifest.
