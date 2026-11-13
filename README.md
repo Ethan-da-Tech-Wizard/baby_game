@@ -26,11 +26,11 @@ Every single key on the keyboard does something drastically different across the
     - **`J`**: **Togepi** (Eggshell baby with red & blue triangles waving its tiny arms!)
     - **`P`**: **Pikachu & Party** (Electric mouse wiggling ears with red glowing cheeks!)
 - 🌈 **Crazy Visual FX**: Rainbow warp, fireworks, lightning storms, raining clouds, bubble popping, bouncing physics balls, laser cannons, disco strobe, and confetti cannons!
-- 🔒 **Toddler-Proof Chromebook Defense**:
-  - Intercepts keys like `Backspace`, `Tab`, `Alt`, and `Space` to prevent accidental navigation or tab closure.
-  - One-click Fullscreen toggle (`F4` or on-screen button) so tiny hands can't accidentally close the window.
+- 🔒 **Navigation Controls**:
+  - Attempts to intercept some keys such as `Backspace`, `Tab`, `Alt`, and `Space`; browsers and operating systems may reserve keys or shortcuts.
+  - A fullscreen toggle (`F4` or on-screen button) where supported; fullscreen does not prevent a user from leaving or closing the window.
   - Multi-touch screen support for touch Chromebooks!
-- 🚀 **100% Offline & Zero Dependency**: Built using standard HTML5 Canvas, Web Audio API, and SpeechSynthesis. No missing external links, works completely offline in the car or airplane!
+- 🚀 **Browser APIs**: Uses HTML5 Canvas, Web Audio API, and SpeechSynthesis. Local use and speech availability depend on the browser, device, and installed voices; GitHub Pages requires a connection to load.
 
 ---
 
@@ -42,7 +42,7 @@ Every single key on the keyboard does something drastically different across the
 3. Click anywhere on the screen to start audio and enter **Fullscreen Mode**.
 4. Let your toddler mash away!
 
-### Option 2: Local Play (No Internet Required)
+### Option 2: Local Play
 1. Download or clone this repository to the Chromebook's "My Files" / Downloads folder.
 2. Double click `index.html` to open it in Chrome.
 3. Press `F4` (the Fullscreen key on the top row) and enjoy!
@@ -72,3 +72,4 @@ included in this repository. `audio/dad/manifest.json` is intentionally empty, a
 the game falls back to its built-in synthesized speech. To use your own voice, run
 `python3 record_dad.py`, which records and slices clips into `audio/dad/` and writes
 the manifest.
+
