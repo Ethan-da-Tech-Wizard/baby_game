@@ -1,12 +1,12 @@
 /**
- * Program: Baby Game Keyboard & Touch Controller
- * Programmer: The Maintainer
- * Last Modified: 11/08/2026
- * Purpose: Complete Chromebook keyboard mapping (80+ keys) + multi-touch sensor with
- *          toddler-proof navigation defense and instant audiovisual feedback.
+ * Program: baby_game - keys.js
+ * Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+ * Last Modified: 2026-11-18
+ * Purpose: Maps keyboard keys and touch/pointer input to words, sounds and visual effects, blocks accidental browser navigation, and wires up the on-screen HUD buttons and start overlay.
  */
 
 (() => {
+  // Shared engine singletons created by the earlier scripts.
   const audio = window.audioEngine;
   const effects = window.effectsEngine;
   const anime = window.animeEngine;
@@ -208,11 +208,13 @@
   };
 
   // Update HUD Badges
+  /** Shows the active backdrop theme's name in the HUD badge. */
   function updateThemeBadge() {
     const badge = document.getElementById('theme-badge');
     badge.innerText = anime.getThemeName();
   }
 
+  /** Starts or stops the song, updates its HUD badge and celebrates with a banner and confetti when starting. */
   function toggleSharkSong() {
     const isPlaying = audio.toggleBabyShark();
     const badge = document.getElementById('shark-badge');
@@ -224,6 +226,7 @@
     }
   }
 
+  /** Cycles the dance troupe level, updates its badge and plays a fanfare, banner and fireworks when active. */
   function togglePokemonDance() {
     const intensity = pokemon.toggle();
     const badge = document.getElementById('poke-badge');
@@ -237,6 +240,7 @@
     }
   }
 
+  /** Enters fullscreen if not in it, otherwise exits; errors are ignored. */
   function toggleFullscreen() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
@@ -245,7 +249,9 @@
     }
   }
 
+  // Each key press runs: block risky navigation keys, find the key's entry, advance its 3-item cycle, then fire sound, effect, speech and banner.
   // Master Key Down Handler
+  /** Master key handler: blocks navigation keys, then looks up the key and triggers its word, sound and effect (or a generic fallback). */
   function handleKeyDown(e) {
     audio.ensureContext();
 
@@ -537,6 +543,7 @@
   }
 
   // Pointer & Touch Event Handlers (for Touchscreen Chromebooks)
+  /** Handles a tap or click at its coordinates (center of screen if unknown) with fireworks, a bouncing ball and a boing sound. */
   function handleScreenTouch(e) {
     audio.ensureContext();
     const x = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : window.innerWidth * 0.5);
@@ -551,6 +558,7 @@
   const startOverlay = document.getElementById('start-overlay');
   const btnStart = document.getElementById('btn-start');
 
+  /** Starts audio, hides the start overlay and celebrates, then goes fullscreen. */
   function dismissStartModal() {
     audio.ensureContext();
     startOverlay.classList.remove('active');
@@ -559,6 +567,7 @@
     toggleFullscreen();
   }
 
+  // Either the button or the whole overlay dismisses the start screen (also unlocks audio via a user gesture).
   btnStart.addEventListener('click', dismissStartModal);
   startOverlay.addEventListener('click', dismissStartModal);
 

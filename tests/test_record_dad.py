@@ -1,3 +1,7 @@
+# Program: baby_game - tests/test_record_dad.py
+# Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+# Last Modified: 2026-11-18
+# Purpose: Unit tests for record_dad.py covering speech-segment detection on synthetic audio, manifest save/load, and the voice item catalog.
 """
 Program: Baby Game Voice Studio Test Suite
 Programmer: The Maintainer

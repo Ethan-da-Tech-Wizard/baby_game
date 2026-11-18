@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!--
+  Program: baby_game - studio.html
+  Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+  Last Modified: 2026-11-18
+  Purpose: Studio page for previewing the game's animation and voice features, with its own inline styling and script.
+-->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -224,6 +230,7 @@
   </main>
 
   <script>
+    // Roster of showcased characters: display name plus the image file base name under images/pokemon/.
     const POKEMON_DATA = [
       { name: 'Pikachu', file: 'pikachu' },
       { name: 'Charizard', file: 'charizard' },
@@ -237,9 +244,11 @@
       { name: 'Starly', file: 'starly' }
     ];
 
+    // When true the roster shows animated GIFs instead of still PNG artwork.
     let showAnimated = false;
     const grid = document.getElementById('poke-grid');
 
+    // Rebuilds the roster grid from POKEMON_DATA, using the GIF or PNG variant per the toggle.
     function renderPokemon() {
       grid.innerHTML = '';
       POKEMON_DATA.forEach(p => {
@@ -260,6 +269,7 @@
       renderPokemon();
     });
 
+    // Draw the roster once on page load.
     renderPokemon();
 
     // Check Dad's voice manifest
@@ -274,6 +284,7 @@
       });
 
     // Populate Key Cycle List
+    // Example keys and their three cycling items, shown as read-only rows for reference.
     const SAMPLES = [
       { key: 'A', items: ['🍎 1. Apple', '🦖 2. Aerodactyl (Artwork)', '🚀 3. Astronaut'] },
       { key: 'B', items: ['⚽ 1. Beach Ball', '🐢 2. Blastoise (Water Jets)', '🦋 3. Butterfly'] },
@@ -290,6 +301,7 @@
       { key: 'Z', items: ['🦝 1. Zigzagoon (Raccoon)', '🦓 2. Zebra', '⚡ 3. Laser Zap'] }
     ];
 
+    // Build one row per sample key with a badge and a pill for each of its items.
     const cycleList = document.getElementById('cycle-list');
     SAMPLES.forEach(s => {
       const row = document.createElement('div');

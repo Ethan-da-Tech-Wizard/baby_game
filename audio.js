@@ -1,12 +1,13 @@
 /**
- * Program: Baby Game Procedural Audio Engine
- * Programmer: The Maintainer
- * Last Modified: 11/08/2026
- * Purpose: 100% Procedural Web Audio API sound synthesis and SpeechSynthesis management.
- *          Zero external asset dependencies - works completely offline!
+ * Program: baby_game - audio.js
+ * Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+ * Last Modified: 2026-11-18
+ * Purpose: Synthesizes every game sound with the Web Audio API (animals, effects, a looping song) and plays recorded or synthesized speech for keys, with no external audio assets required.
  */
 
+/** Procedural sound engine: owns the Web Audio context and master volume, synthesizes all sound effects, and plays word audio. */
 class SoundEngine {
+  /** Initializes audio state (context created lazily), volume, mute and song flags, then starts loading the recorded-voice manifest. */
   constructor() {
     this.ctx = null;
     this.masterGain = null;
@@ -20,6 +21,7 @@ class SoundEngine {
     this.loadDadManifest();
   }
 
+  /** Fetches the recorded-voice manifest (key to audio file path); on success updates the on-screen voice badge with the clip count, on failure falls back to an empty manifest. */
   loadDadManifest() {
     fetch('audio/dad/manifest.json')
       .then(res => res.json())
@@ -39,6 +41,7 @@ class SoundEngine {
       });
   }
 
+  /** Creates the AudioContext and master gain node (once) so all sounds share one volume control. */
   init() {
     if (this.ctx) return;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -48,6 +51,7 @@ class SoundEngine {
     this.masterGain.connect(this.ctx.destination);
   }
 
+  /** Creates the audio context if needed and resumes it if the browser suspended it (browsers require a user gesture first). */
   ensureContext() {
     if (!this.ctx) {
       this.init();
@@ -57,6 +61,7 @@ class SoundEngine {
     }
   }
 
+  /** Adjusts master volume by `delta`, clamped to 10%-100%, and returns the new level as a percentage. */
   setVolume(delta) {
     this.volumeLevel = Math.max(0.1, Math.min(1.0, this.volumeLevel + delta));
     if (this.masterGain && this.ctx) {
@@ -65,6 +70,7 @@ class SoundEngine {
     return Math.round(this.volumeLevel * 100);
   }
 
+  /** Flips mute on or off by setting master gain to 0 or the saved volume, and returns the new muted state. */
   toggleMute() {
     this.isMuted = !this.isMuted;
     if (this.masterGain && this.ctx) {
@@ -81,6 +87,7 @@ class SoundEngine {
   // D4 - E4 - G4 - G4 - G4 - G4 - G4 - G4 (Baby shark, doo doo doo doo doo doo)
   // D4 - E4 - G4 - G4 - G4 - G4 - G4 - G4 (Baby shark, doo doo doo doo doo doo)
   // G4 - G4 - F#4 (Baby shark!)
+  /** Starts or stops the looping children's song sequence; returns true when it is now playing. */
   toggleBabyShark() {
     this.ensureContext();
     this.babySharkRunning = !this.babySharkRunning;
@@ -96,6 +103,7 @@ class SoundEngine {
     return this.babySharkRunning;
   }
 
+  /** Plays the next note of the song and schedules the following one with a timer while the song is running. */
   playBabySharkSequence() {
     if (!this.babySharkRunning || !this.ctx) return;
 
@@ -170,6 +178,7 @@ class SoundEngine {
     }, dur * 1000);
   }
 
+  /** Plays one short, bell-like melodic note at `freq` Hz lasting about `dur` seconds. */
   playMarimbaTone(freq, dur) {
     if (!this.ctx || this.isMuted) return;
     const now = this.ctx.currentTime;
@@ -192,6 +201,7 @@ class SoundEngine {
     osc.stop(now + dur + 0.05);
   }
 
+  /** Plays one low plucked bass note at `freq` Hz for roughly `dur` seconds. */
   playBassPluck(freq, dur) {
     if (!this.ctx || this.isMuted) return;
     const now = this.ctx.currentTime;
@@ -212,6 +222,7 @@ class SoundEngine {
     osc.stop(now + dur + 0.05);
   }
 
+  /** Plays a short percussive drum hit. */
   playDrumTap() {
     if (!this.ctx || this.isMuted) return;
     const now = this.ctx.currentTime;
@@ -237,6 +248,7 @@ class SoundEngine {
   // ==========================================
 
   // 1. Cow (Moooo)
+  /** Synthesizes a cow moo. */
   playCowMoo() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -266,6 +278,7 @@ class SoundEngine {
   }
 
   // 2. Duck (Quack Quack)
+  /** Synthesizes a duck quack. */
   playDuckQuack() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -297,6 +310,7 @@ class SoundEngine {
   }
 
   // 3. Dog (Woof Woof!)
+  /** Synthesizes a dog bark. */
   playDogBark() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -322,6 +336,7 @@ class SoundEngine {
   }
 
   // 4. Cat (Meowww)
+  /** Synthesizes a cat meow. */
   playCatMeow() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -352,6 +367,7 @@ class SoundEngine {
   }
 
   // 5. Sheep (Baaaa!)
+  /** Synthesizes a sheep baa. */
   playSheepBaa() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -385,6 +401,7 @@ class SoundEngine {
   }
 
   // 6. Lion (Rooaaar!)
+  /** Synthesizes a lion roar. */
   playLionRoar() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -416,6 +433,7 @@ class SoundEngine {
   }
 
   // 7. Frog (Ribbit Ribbit)
+  /** Synthesizes a frog ribbit. */
   playFrogRibbit() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -441,6 +459,7 @@ class SoundEngine {
   }
 
   // 8. Elephant (Trumpet Pawoo!)
+  /** Synthesizes an elephant trumpet. */
   playElephantTrumpet() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -465,6 +484,7 @@ class SoundEngine {
   }
 
   // 9. Songbird (Tweet Tweet!)
+  /** Synthesizes a bird chirp. */
   playBirdChirp() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -491,6 +511,7 @@ class SoundEngine {
   }
 
   // 10. Dino (Roar!)
+  /** Synthesizes a dinosaur roar. */
   playDinoRoar() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -519,6 +540,7 @@ class SoundEngine {
   }
 
   // 11. Owl (Hoo Hoo)
+  /** Synthesizes an owl hoot. */
   playOwlHoot() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -545,6 +567,7 @@ class SoundEngine {
   }
 
   // 12. Rooster (Cock-a-doodle-doo)
+  /** Synthesizes a rooster crow. */
   playRooster() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -576,6 +599,7 @@ class SoundEngine {
   // 💥 COMICAL SOUND EFFECTS & INSTRUMENTS
   // ==========================================
 
+  /** Synthesizes a springy boing effect. */
   playBoing() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -597,6 +621,7 @@ class SoundEngine {
     osc.stop(now + 0.4);
   }
 
+  /** Synthesizes a sci-fi laser zap. */
   playLaser() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -618,6 +643,7 @@ class SoundEngine {
     osc.stop(now + 0.23);
   }
 
+  /** Synthesizes a deep boom or explosion. */
   playBoom() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -639,6 +665,7 @@ class SoundEngine {
     osc.stop(now + 0.7);
   }
 
+  /** Plays a bright celebratory chime sequence. */
   playChimeFanfare() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -662,6 +689,7 @@ class SoundEngine {
     });
   }
 
+  /** Plays a rising level-up arpeggio. */
   playLevelUp() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -685,6 +713,7 @@ class SoundEngine {
     });
   }
 
+  /** Synthesizes a party horn blast. */
   playPartyHorn() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -706,6 +735,7 @@ class SoundEngine {
     osc.stop(now + 0.5);
   }
 
+  /** Synthesizes a sliding whistle. */
   playSlideWhistle() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -727,6 +757,7 @@ class SoundEngine {
     osc.stop(now + 0.5);
   }
 
+  /** Plays a short drum-kit pattern. */
   playDrumKit() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -737,6 +768,7 @@ class SoundEngine {
     }, 120);
   }
 
+  /** Synthesizes a rising energy-charge whoosh used when the theme changes. */
   playSaiyanAuraSound() {
     this.ensureContext();
     if (this.isMuted) return;
@@ -769,6 +801,7 @@ class SoundEngine {
   // ==========================================
   // 🗣️ TODDLER SPEECH / DAD VOICE ENGINE
   // ==========================================
+  /** Says a word for a pressed key: plays the recorded clip (with an optional 'letter is for' intro) when one exists, otherwise falls back to speech synthesis. Does nothing while muted. */
   speakWord(text, keyCode, cycleIdx = 0) {
     if (this.isMuted) return;
 
@@ -835,6 +868,7 @@ class SoundEngine {
     this.playSpeechSynthFallback(text, keyCode);
   }
 
+  /** Speaks the word with the browser's speech synthesis at a friendly pitch, sometimes prefixed with 'letter is for'; emojis are stripped first. */
   playSpeechSynthFallback(text, keyCode) {
     if (!('speechSynthesis' in window)) return;
     try {

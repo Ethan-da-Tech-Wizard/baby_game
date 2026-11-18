@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Program: baby_game - record_dad.py
+# Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+# Last Modified: 2026-11-18
+# Purpose: Records a spoken prompt from the microphone, detects the pauses between words, slices the take into separate normalized WAV clips and keeps a JSON manifest of them for the game to play.
 """
 Program: Dad's Voice Studio & Audio Splitter
 Programmer: The Maintainer
@@ -69,9 +73,11 @@ VOICE_ITEMS = [
 
 
 def ensure_dirs():
+    """Create the output audio folder if it does not exist."""
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def load_manifest():
+    """Return the saved key-to-file manifest, or an empty dict if it is missing or unreadable."""
     if os.path.exists(MANIFEST_PATH):
         try:
             with open(MANIFEST_PATH, "r") as f:
@@ -81,6 +87,7 @@ def load_manifest():
     return {}
 
 def save_manifest(manifest):
+    """Write the manifest dict to disk as indented JSON."""
     with open(MANIFEST_PATH, "w") as f:
         json.dump(manifest, f, indent=2)
 
@@ -146,6 +153,7 @@ def detect_speech_segments(wav_path):
     return segments, framerate, n_channels, sampwidth, samples
 
 def record_and_split(key, words, duration=4.0):
+    """Record `duration` seconds from the microphone, split the take into word clips, normalize them, update the manifest, and return the list of (label, path) pairs."""
     ensure_dirs()
     temp_wav = os.path.join(OUTPUT_DIR, f"{key}_full.wav")
 
@@ -173,6 +181,7 @@ def record_and_split(key, words, duration=4.0):
     manifest[key] = f"audio/dad/{key}.wav"
 
     def save_slice(st, en, filename):
+        """Write samples [st:en] to a mono WAV file, normalize its loudness, and return its path."""
         chunk_samples = samples[st:en]
         raw_chunk = struct.pack(f"<{len(chunk_samples)}h", *chunk_samples)
         part_wav = os.path.join(OUTPUT_DIR, filename)
@@ -223,10 +232,12 @@ def record_and_split(key, words, duration=4.0):
     return split_files
 
 def play_file(path):
+    """Play an audio file with the system player if it exists."""
     if os.path.exists(path):
         subprocess.run(["pw-play", path], check=False)
 
 def interactive_mode(default_dur=4.0, filter_items=None, start_key=None):
+    """Walk the user through recording each voice item, with optional filtering and a starting key."""
     print("=" * 68)
     print("🎙️  DAD'S VOICE STUDIO: '[LETTER] IS FOR...' 4-SECOND RECORDER  👶")
     print("=" * 68)
@@ -289,6 +300,7 @@ def interactive_mode(default_dur=4.0, filter_items=None, start_key=None):
     print("\n🎉 All recordings saved and manifest updated at audio/dad/manifest.json!")
 
 def main():
+    """Parse command-line options and run the requested action (record, list, clear or interactive session)."""
     parser = argparse.ArgumentParser(description="Dad Voice Studio with 3-Word Auto-Splitter")
     parser.add_argument("--key", help="Record a specific key (e.g. KeyJ, KeyA, Space)")
     parser.add_argument("--start", help="Start recording from a specific key (e.g. KeyJ)")

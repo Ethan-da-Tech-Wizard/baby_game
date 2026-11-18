@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!--
+  Program: baby_game - index.html
+  Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+  Last Modified: 2026-11-18
+  Purpose: Main game page: loads the canvas, HUD buttons and start overlay, pulls in the audio, backdrop, effects and key-handler scripts, and registers the offline service worker.
+-->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -69,6 +75,7 @@
     </div>
   </div>
 
+  <!-- Load order matters: keys.js reads the audio, backdrop and effects engines that the earlier scripts create. -->
   <!-- Scripts -->
   <script src="audio.js"></script>
   <script src="anime.js"></script>

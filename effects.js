@@ -1,11 +1,13 @@
 /**
- * Program: Baby Game Screen Effects Engine
- * Programmer: The Maintainer
- * Last Modified: 11/08/2026
- * Purpose: Canvas-based visual transformations, particle engines, and ambient layer manager.
+ * Program: baby_game - effects.js
+ * Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+ * Last Modified: 2026-11-18
+ * Purpose: Runs the full-screen canvas render loop: particle effects (confetti, fireworks, bubbles, lasers), toggleable ambient layers (rain, starfield, rainbow, strobe) and the splash banner.
  */
 
+/** Owns the main canvas and render loop; spawns and animates particle effects and manages toggleable ambient layers. */
 class EffectsEngine {
+  /** Grabs the canvas, creates empty particle lists and layer flags, sets up resize handling and starts the animation loop. */
   constructor() {
     this.canvas = document.getElementById('game-canvas');
     this.ctx = this.canvas.getContext('2d');
@@ -53,6 +55,7 @@ class EffectsEngine {
     requestAnimationFrame(this.renderLoop);
   }
 
+  /** Matches the canvas size to the window and re-seeds size-dependent state. */
   resize() {
     this.width = window.innerWidth;
     this.height = window.innerHeight;
@@ -67,6 +70,7 @@ class EffectsEngine {
     }
   }
 
+  /** Creates the random star positions used by the galaxy warp layer. */
   initStarfield() {
     this.stars = [];
     for (let i = 0; i < 200; i++) {
@@ -84,6 +88,7 @@ class EffectsEngine {
   // ⚡ INSTANTANEOUS VISUAL TRIGGERS
   // ==========================================
 
+  /** Briefly flashes the screen. */
   triggerFlash() {
     const strobe = document.getElementById('strobe-overlay');
     strobe.classList.remove('flash');
@@ -91,6 +96,7 @@ class EffectsEngine {
     strobe.classList.add('flash');
   }
 
+  /** Shakes the page; `isViolent` selects the stronger earthquake-style shake. */
   triggerScreenShake(isViolent = false) {
     const cls = isViolent ? 'shake-quake' : 'shake-gentle';
     document.body.classList.remove('shake-gentle', 'shake-quake');
@@ -101,6 +107,7 @@ class EffectsEngine {
     }, isViolent ? 600 : 300);
   }
 
+  /** Shows a large pop-up banner with a letter, word and optional image or emoji. */
   showSplashBanner(letter, word, imgUrl = null, emoji = null) {
     const banner = document.getElementById('splash-banner');
     const letterEl = document.getElementById('splash-letter');
@@ -134,6 +141,7 @@ class EffectsEngine {
   }
 
   // 1. Confetti Cannon Blast
+  /** Adds `count` confetti pieces to the particle list. */
   spawnConfetti(count = 200) {
     const colors = ['#ff2a6d', '#05d9e8', '#ffec3d', '#00f076', '#a855f7', '#ff6b6b'];
     for (let i = 0; i < count; i++) {
@@ -152,6 +160,7 @@ class EffectsEngine {
   }
 
   // 2. Fireworks Blast
+  /** Adds a firework burst at (x, y), or a random spot when none is given. */
   spawnFireworks(x, y) {
     const fx = x || Math.random() * (this.width * 0.8) + this.width * 0.1;
     const fy = y || Math.random() * (this.height * 0.5) + this.height * 0.15;
@@ -175,6 +184,7 @@ class EffectsEngine {
   }
 
   // 3. Lightning Flash with Jagged Forked Branches
+  /** Adds a lightning bolt to the effects list. */
   spawnLightningBolt() {
     this.triggerFlash();
     this.triggerScreenShake(false);
@@ -200,6 +210,7 @@ class EffectsEngine {
   }
 
   // 4. Bouncing Beach Balls (Physics)
+  /** Adds a bouncing ball at (x, y). */
   spawnBouncingBall(x, y) {
     const colors = ['#f43f5e', '#06b6d4', '#eab308', '#84cc16', '#a855f7'];
     this.bouncingBalls.push({
@@ -214,6 +225,7 @@ class EffectsEngine {
   }
 
   // 5. Floating Soap Bubbles
+  /** Adds a floating bubble at (x, y). */
   spawnBubble(x, y) {
     this.floatingBubbles.push({
       x: x || Math.random() * this.width,
@@ -227,6 +239,7 @@ class EffectsEngine {
   }
 
   // 6. Candy & Donut Rain
+  /** Adds `count` falling candy pieces. */
   spawnCandyRain(count = 15) {
     const treats = ['🍩', '🍭', '🍬', '🍦', '🧁', '🍪', '🍎', '🍓', '🍌', '🍕'];
     for (let i = 0; i < count; i++) {
@@ -243,6 +256,7 @@ class EffectsEngine {
   }
 
   // 7. Bouncing Emojis
+  /** Adds `count` floating emoji particles. */
   spawnEmojiBurst(count = 15) {
     const emojis = ['😃', '🤩', '🥳', '😎', '🎉', '🌟', '🦄', '🐶', '🚀', '🌈'];
     for (let i = 0; i < count; i++) {
@@ -259,6 +273,7 @@ class EffectsEngine {
   }
 
   // 8. Laser Beam Shot
+  /** Adds a laser beam to the effects list. */
   spawnLaserBeam() {
     this.lasers.push({
       y: Math.random() * (this.height * 0.7) + this.height * 0.15,
@@ -272,36 +287,43 @@ class EffectsEngine {
   // 🔄 AMBIENT LAYER TOGGLES & CYCLES
   // ==========================================
 
+  /** Steps the digital-rain layer through its levels (off, low, high). */
   cycleMatrixRain() {
     this.activeLayers.matrixRain = (this.activeLayers.matrixRain + 1) % 3;
     return this.activeLayers.matrixRain;
   }
 
+  /** Steps the rain layer through its levels (off, gentle, storm). */
   cycleRainStorm() {
     this.activeLayers.rainStorm = (this.activeLayers.rainStorm + 1) % 3;
     return this.activeLayers.rainStorm;
   }
 
+  /** Turns the rainbow arch layer on or off. */
   toggleRainbow() {
     this.activeLayers.rainbow = !this.activeLayers.rainbow;
     return this.activeLayers.rainbow;
   }
 
+  /** Steps the starfield layer through its levels (off, cruising, hyperdrive). */
   cycleGalaxyWarp() {
     this.activeLayers.galaxyWarp = (this.activeLayers.galaxyWarp + 1) % 3;
     return this.activeLayers.galaxyWarp;
   }
 
+  /** Turns the laser grid layer on or off. */
   toggleLaserGrid() {
     this.activeLayers.laserGrid = !this.activeLayers.laserGrid;
     return this.activeLayers.laserGrid;
   }
 
+  /** Turns the floating hearts layer on or off. */
   toggleFloatingHearts() {
     this.activeLayers.floatingHearts = !this.activeLayers.floatingHearts;
     return this.activeLayers.floatingHearts;
   }
 
+  /** Turns the scanline overlay on or off. */
   toggleCRTScanlines() {
     this.activeLayers.crtScanlines = !this.activeLayers.crtScanlines;
     const crt = document.getElementById('crt-overlay');
@@ -309,6 +331,7 @@ class EffectsEngine {
     return this.activeLayers.crtScanlines;
   }
 
+  /** Turns the disco strobe overlay on or off. */
   toggleDiscoStrobe() {
     this.activeLayers.discoStrobe = !this.activeLayers.discoStrobe;
     const disco = document.getElementById('disco-overlay');
@@ -316,21 +339,25 @@ class EffectsEngine {
     return this.activeLayers.discoStrobe;
   }
 
+  /** Turns the color-invert overlay on or off. */
   toggleInvertColors() {
     const invert = document.getElementById('invert-overlay');
     invert.classList.toggle('active');
   }
 
+  /** Turns reverse gravity for the bouncing balls on or off. */
   toggleReverseGravity() {
     this.activeLayers.reverseGravity = !this.activeLayers.reverseGravity;
     return this.activeLayers.reverseGravity;
   }
 
+  /** Turns slow motion on or off (time scale 0.3 versus 1.0). */
   toggleBulletTime() {
     this.activeLayers.bulletTime = !this.activeLayers.bulletTime;
     return this.activeLayers.bulletTime;
   }
 
+  /** Resets every ambient layer and overlay to off and removes the shake classes. */
   clearAllLayers() {
     this.confetti = [];
     this.fireworks = [];
@@ -362,6 +389,7 @@ class EffectsEngine {
   // 🎨 MAIN ANIMATION LOOP
   // ==========================================
 
+  /** Per-frame loop: draws the backdrop, ambient layers, character troupe and particles in order, then schedules the next frame. */
   renderLoop(timeNow) {
     const delta = (timeNow - this.lastTime) * 0.001;
     this.lastTime = timeNow;
@@ -423,6 +451,7 @@ class EffectsEngine {
   }
 
   // Rainbow Arch
+  /** Draws the rainbow arch as concentric colored arcs. */
   renderRainbow() {
     this.ctx.save();
     const cx = this.width * 0.5;
@@ -448,6 +477,7 @@ class EffectsEngine {
   }
 
   // Starfield Warp
+  /** Draws and advances the starfield for the galaxy warp layer. */
   renderStarfield(timeScale) {
     this.ctx.save();
     const cx = this.width * 0.5;
@@ -491,6 +521,7 @@ class EffectsEngine {
   }
 
   // Matrix Rain
+  /** Draws falling digital-rain columns. */
   renderMatrixRain(timeScale) {
     this.ctx.save();
     this.ctx.fillStyle = 'rgba(0, 255, 120, 0.85)';
@@ -513,6 +544,7 @@ class EffectsEngine {
   }
 
   // Rainstorm & Cloud
+  /** Draws the rain cloud and falling droplets. */
   renderRainStorm(timeScale) {
     this.ctx.save();
     const count = this.activeLayers.rainStorm === 2 ? 60 : 25;
@@ -539,6 +571,7 @@ class EffectsEngine {
   }
 
   // Laser Grid
+  /** Draws the animated laser grid using the time `phase`. */
   renderLaserGrid(phase) {
     this.ctx.save();
     this.ctx.strokeStyle = 'rgba(255, 42, 109, 0.4)';
@@ -556,6 +589,7 @@ class EffectsEngine {
   }
 
   // Physics Bouncing Balls
+  /** Moves balls with gravity and wall bounces, then draws them. */
   updateAndDrawBouncingBalls(timeScale) {
     const gravity = (this.activeLayers.reverseGravity ? -0.4 : 0.45) * timeScale;
     for (let i = this.bouncingBalls.length - 1; i >= 0; i--) {
@@ -612,6 +646,7 @@ class EffectsEngine {
   }
 
   // Floating Soap Bubbles
+  /** Moves and draws the floating bubbles. */
   updateAndDrawBubbles(timeScale) {
     this.ctx.save();
     for (let i = this.floatingBubbles.length - 1; i >= 0; i--) {
@@ -643,6 +678,7 @@ class EffectsEngine {
   }
 
   // Candy Rain
+  /** Moves and draws the falling candy. */
   updateAndDrawCandyRain(timeScale) {
     this.ctx.save();
     for (let i = this.candyRain.length - 1; i >= 0; i--) {
@@ -668,6 +704,7 @@ class EffectsEngine {
   }
 
   // Confetti
+  /** Moves, fades and draws the confetti. */
   updateAndDrawConfetti(timeScale) {
     this.ctx.save();
     for (let i = this.confetti.length - 1; i >= 0; i--) {
@@ -695,6 +732,7 @@ class EffectsEngine {
   }
 
   // Fireworks
+  /** Moves and draws firework particles. */
   updateAndDrawFireworks(timeScale) {
     this.ctx.save();
     for (let i = this.fireworks.length - 1; i >= 0; i--) {
@@ -721,6 +759,7 @@ class EffectsEngine {
   }
 
   // Emojis
+  /** Moves and draws the emoji particles. */
   updateAndDrawEmojis(timeScale) {
     this.ctx.save();
     for (let i = this.emojis.length - 1; i >= 0; i--) {
@@ -746,6 +785,7 @@ class EffectsEngine {
   }
 
   // Laser Beams
+  /** Draws active laser beams and removes expired ones. */
   updateAndDrawLasers() {
     this.ctx.save();
     for (let i = this.lasers.length - 1; i >= 0; i--) {
@@ -770,6 +810,7 @@ class EffectsEngine {
   }
 
   // Lightning
+  /** Draws active lightning bolts and removes expired ones. */
   updateAndDrawLightning() {
     this.ctx.save();
     for (let i = this.lightningBolts.length - 1; i >= 0; i--) {
@@ -797,6 +838,7 @@ class EffectsEngine {
   }
 
   // Floating Hearts
+  /** Draws the floating hearts layer using the time `phase`. */
   renderFloatingHearts(phase) {
     this.ctx.save();
     this.ctx.fillStyle = 'rgba(244, 63, 94, 0.75)';
