@@ -1,11 +1,12 @@
-"""
-Program: Baby Game Voice Studio Test Suite
-Programmer: The Maintainer
-Last Modified: 11/08/2026
-Purpose: Automated unit tests for speech pause detection, WAV slicing, and
-         audio manifest persistence in the Baby Game voice studio.
-"""
-
+# ==============================================================================
+# Program: test_record_dad.py
+# Programmer: Ethan-da-Tech-Wizard
+# Last Modified: November 18, 2026
+# Purpose: Automated regression test suite for voice studio audio signal processing.
+#          Generates synthetic PCM waveforms containing tone bursts and calibrated silence,
+#          validates pause-detection and segmentation algorithms, and verifies WAV output
+#          integrity without requiring live microphone hardware.
+# ============================================================================== 
 import unittest
 import math
 import struct

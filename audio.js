@@ -1,11 +1,12 @@
-/**
- * Program: Baby Game Procedural Audio Engine
- * Programmer: The Maintainer
- * Last Modified: 11/08/2026
- * Purpose: 100% Procedural Web Audio API sound synthesis and SpeechSynthesis management.
- *          Zero external asset dependencies - works completely offline!
- */
-
+// ==============================================================================
+// Program: audio.js
+// Programmer: Ethan-da-Tech-Wizard
+// Last Modified: November 18, 2026
+// Purpose: 100% Procedural Web Audio API sound synthesis and speech engine.
+//          Constructs dynamic audio graphs using OscillatorNodes, BiquadFilterNodes,
+//          and GainNodes with ADSR envelopes to generate instruments, animal cries,
+//          cartoon sound effects, and SpeechSynthesis voice prompts without external files.
+// ============================================================================== 
 class SoundEngine {
   constructor() {
     this.ctx = null;
@@ -39,7 +40,11 @@ class SoundEngine {
       });
   }
 
-  init() {
+    // STEP-BY-STEP EDUCATIONAL GUIDE: PROCEDURAL AUDIO RENDERING PIPELINE
+  // 1. AudioContext Initialization: Lazily constructs AudioContext upon first user touch/keypress.
+  // 2. Master Gain Staging: Creates master GainNode connected directly to ctx.destination.
+  // 3. State Resumption: Automatically calls ctx.resume() if suspended by browser autoplay policy.
+init() {
     if (this.ctx) return;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     this.ctx = new AudioContext();

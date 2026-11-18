@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+# ==============================================================================
+# Program: record_dad.py
+# Programmer: Ethan-da-Tech-Wizard
+# Last Modified: November 18, 2026
+# Purpose: Audio signal processing and automated speech pause-detection pipeline.
+#          Records multi-word voice prompts, evaluates root-mean-square (RMS) energy
+#          levels across sliding temporal windows, segments spoken utterances based on
+#          adaptive silence thresholds, and exports individual calibrated WAV audio clips.
+# ============================================================================== 
 """
 Program: Dad's Voice Studio & Audio Splitter
 Programmer: The Maintainer
@@ -6,7 +15,6 @@ Last Modified: 11/08/2026
 Purpose: Automated voice recording and intelligent speech pause-detection pipeline
          for Baby Game, slicing 3-word vocabulary prompts into distinct WAV audio files.
 """
-
 import os
 import sys
 import json

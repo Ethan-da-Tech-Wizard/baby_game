@@ -1,10 +1,12 @@
-/**
- * Program: Baby Game Screen Effects Engine
- * Programmer: The Maintainer
- * Last Modified: 11/08/2026
- * Purpose: Canvas-based visual transformations, particle engines, and ambient layer manager.
- */
-
+// ==============================================================================
+// Program: effects.js
+// Programmer: Ethan-da-Tech-Wizard
+// Last Modified: November 18, 2026
+// Purpose: Screen effects, interactive particle physics, and visual feedback engine.
+//          Executes high-frequency particle simulation loops, multi-colored ripple
+//          geometry calculations, DOM canvas dimension management, and high-performance
+//          composite rendering operations.
+// ============================================================================== 
 class EffectsEngine {
   constructor() {
     this.canvas = document.getElementById('game-canvas');

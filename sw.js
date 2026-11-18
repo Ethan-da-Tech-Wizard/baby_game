@@ -1,3 +1,11 @@
+// ==============================================================================
+// Program: sw.js
+// Programmer: Ethan-da-Tech-Wizard
+// Last Modified: November 18, 2026
+// Purpose: Progressive Web App (PWA) Service Worker lifecycle controller.
+//          Intercepts network fetch events, manages cache storage for zero-dependency
+//          offline execution, and coordinates cache version invalidation upon updates.
+// ============================================================================== 
 const CACHE_NAME = 'baby-game-v3';
 const ASSETS = [
   './',
@@ -23,6 +31,10 @@ const ASSETS = [
   'images/pokemon/starly.png'
 ];
 
+// STEP-BY-STEP EDUCATIONAL GUIDE: SERVICE WORKER LIFECYCLE EVENTS
+// 1. Install Event: Pre-caches critical runtime assets into CacheStorage.
+// 2. Activate Event: Purges stale cache versions to maintain consistency.
+// 3. Fetch Event: Implements Cache-First fallback strategy for instant offline responsiveness.
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {

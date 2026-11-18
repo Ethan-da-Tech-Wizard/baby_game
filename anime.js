@@ -1,11 +1,12 @@
-/**
- * Program: Baby Game Anime & Pokémon Troupe Engine
- * Programmer: The Maintainer
- * Last Modified: 11/08/2026
- * Purpose: High-performance vector rendering for anime backdrops & dancing characters.
- *          Toddler-safe: Heroic action, energetic animations, strictly zero violence/nudity.
- */
-
+// ==============================================================================
+// Program: anime.js
+// Programmer: Ethan-da-Tech-Wizard
+// Last Modified: November 18, 2026
+// Purpose: Vector-based anime backdrop and character troupe animation engine.
+//          Implements requestAnimationFrame game loop scheduling, continuous particle
+//          physics simulation, procedural SVG/canvas path rasterization, and
+//          toddler-safe thematic background state transitions.
+// ============================================================================== 
 class AnimeBackdropEngine {
   constructor() {
     this.themes = ['dbz', 'naruto', 'luffy', 'pokemon'];

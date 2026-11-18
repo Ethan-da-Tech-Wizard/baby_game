@@ -1,11 +1,12 @@
-/**
- * Program: Baby Game Keyboard & Touch Controller
- * Programmer: The Maintainer
- * Last Modified: 11/08/2026
- * Purpose: Complete Chromebook keyboard mapping (80+ keys) + multi-touch sensor with
- *          toddler-proof navigation defense and instant audiovisual feedback.
- */
-
+// ==============================================================================
+// Program: keys.js
+// Programmer: Ethan-da-Tech-Wizard
+// Last Modified: November 18, 2026
+// Purpose: Hardware input dispatcher and toddler-proof keyboard/touch controller.
+//          Captures 80+ physical keyboard keycodes and multi-touch DOM events,
+//          intercepts dangerous browser navigation shortcuts via event.preventDefault(),
+//          and routes sensory triggers to audio and visual particle subsystems.
+// ============================================================================== 
 (() => {
   const audio = window.audioEngine;
   const effects = window.effectsEngine;
