@@ -11,28 +11,35 @@ Purpose: Chromebook toddler sensory playground web interface. Organizes high-con
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- user-scalable=no and fixed zoom stop pinch-zoom so a toddler cannot accidentally zoom the play surface. -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
   <title>👶 Baby Game - Chromebook Toddler Sensory Playground</title>
+  <!-- Fonts are loaded from Google Fonts (needs network on first load). styles.css falls back to Nunito, Segoe UI and system fonts, so the game still works offline without them. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;900&family=Nunito:wght@800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <!-- PWA manifest + theme colour + app-capable meta tags let the game install as a full-screen Chromebook app. -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#FF2A6D">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
 </head>
+<!-- The body class is a theme hook only; backdrops are drawn on the canvas by anime.js, and styles.css defines no theme-dbz rule. -->
 <body class="theme-dbz">
   <!-- Screen Shock/Filter Layers -->
+  <!-- Full-screen filter layers stacked above the canvas (z-index 5, pointer-events none). effects.js toggles their CSS classes: crt/disco/invert get "active", strobe gets "flash". -->
   <div id="crt-overlay" class="overlay-layer"></div>
   <div id="disco-overlay" class="overlay-layer"></div>
   <div id="strobe-overlay" class="overlay-layer"></div>
   <div id="invert-overlay" class="overlay-layer"></div>
 
   <!-- Primary Render Surface -->
+  <!-- Single canvas that effects.js sizes to the window and redraws every frame (backdrop, particles, Pokemon troupe). -->
   <canvas id="game-canvas"></canvas>
 
   <!-- Big Floating Notification HUD (Letters, Numbers, Words for Toddler) -->
+  <!-- Splash banner filled in by effects.showSplashBanner(): big letter/number, an image OR emoji, and the word. The placeholder text (A / apple) is replaced at runtime. -->
   <div id="splash-banner" class="hidden">
     <div id="splash-top">
       <span id="splash-letter">A</span>
@@ -45,6 +52,7 @@ Purpose: Chromebook toddler sensory playground web interface. Organizes high-con
   </div>
 
   <!-- Top Toddler Defense & Quick Controls HUD (Subtle and Toddler-Safe) -->
+  <!-- HUD: left badges show state (theme, Baby Shark, dancers, Dad voice clip count); right buttons mirror keyboard shortcuts. Ids are looked up by keys.js and audio.js, so renaming them breaks the game. -->
   <header id="game-hud">
     <div class="hud-left">
       <span class="badge" id="theme-badge">⚡ DBZ Saiyan Aura</span>
@@ -63,6 +71,7 @@ Purpose: Chromebook toddler sensory playground web interface. Organizes high-con
   </header>
 
   <!-- Start / Unlock Modal for Audio (Browser Autoplay Policy) -->
+  <!-- Start overlay: browsers block audio and fullscreen until a user gesture, so the first tap/click here unlocks both (keys.js dismissStartModal). -->
   <div id="start-overlay" class="overlay-screen active">
     <div class="start-card">
       <div class="mascot-bounce">👶 🎮 ⚡</div>
@@ -79,6 +88,7 @@ Purpose: Chromebook toddler sensory playground web interface. Organizes high-con
   </div>
 
   <!-- Scripts -->
+  <!-- Load order matters: keys.js reads window.audioEngine, animeEngine, effectsEngine and pokemonEngine at startup, and effects.js calls animeEngine in its render loop, so audio.js, anime.js and effects.js come first. -->
   <script src="audio.js"></script>
   <script src="anime.js"></script>
   <script src="effects.js"></script>

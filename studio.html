@@ -12,9 +12,11 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎨 Baby Game Animation & Voice Studio</title>
+  <!-- Same Google Fonts dependency as index.html; system fonts are the fallback. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;900&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+  <!-- Page-local styles (this page does not use styles.css). Layout is a two-column grid that collapses to one column under 900px. -->
   <style>
     :root {
       --primary: #ff2a6d;
@@ -76,6 +78,7 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
       margin-bottom: 16px;
       color: var(--secondary);
     }
+    /* Roster cards */
     /* Pokemon Roster */
     .poke-showcase {
       display: grid;
@@ -198,6 +201,7 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
     <a href="index.html" class="back-btn">🚀 Play Game Now</a>
   </header>
 
+  <!-- Three panels: sprite preview, voice studio status, and a read-only sample of the key cycles. -->
   <main class="studio-grid">
     <!-- Panel 1: Official Pokemon & Sprites -->
     <section class="panel">
@@ -224,6 +228,7 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
     </section>
 
     <!-- Panel 3: 3-Item Key Cycle Inspector -->
+    <!-- Spans both grid columns. -->
     <section class="panel" style="grid-column: 1 / -1;">
       <h2>🔤 3-Item Cycling Keymap (Press each key to see all 3!)</h2>
       <p style="margin-bottom: 14px; color: #cbd5e1;">Every physical Chromebook key cycles through 3 totally distinct fun things with their own visuals, sounds, and Pokémon artwork:</p>
@@ -237,6 +242,7 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
        3. Real-Time Feedback: Updates DOM display cards dynamically based on active audio presets. -->
   <script>
 <script>
+    // Roster shown in panel 1; file is the base name under images/pokemon/ (NAME.png artwork, NAME_ani.gif animation).
     const POKEMON_DATA = [
       { name: 'Pikachu', file: 'pikachu' },
       { name: 'Charizard', file: 'charizard' },
@@ -250,9 +256,11 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
       { name: 'Starly', file: 'starly' }
     ];
 
+    // Toggle state: PNG artwork vs animated GIFs.
     let showAnimated = false;
     const grid = document.getElementById('poke-grid');
 
+    // Rebuild the roster grid from POKEMON_DATA using the current artwork/animation mode.
     function renderPokemon() {
       grid.innerHTML = '';
       POKEMON_DATA.forEach(p => {
@@ -275,6 +283,7 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
 
     renderPokemon();
 
+    // Count the entries in audio/dad/manifest.json. The 38 is hard-coded: 26 letters + 10 digits + Space + Enter, matching VOICE_ITEMS in record_dad.py. Note the manifest also holds per-word and intro entries, so its raw entry count can exceed 38.
     // Check Dad's voice manifest
     fetch('audio/dad/manifest.json')
       .then(res => res.json())
@@ -287,6 +296,7 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
       });
 
     // Populate Key Cycle List
+    // Hand-written sample of the key cycles for display only (not generated from keys.js, so it can drift from the real mappings).
     const SAMPLES = [
       { key: 'A', items: ['🍎 1. Apple', '🦖 2. Aerodactyl (Artwork)', '🚀 3. Astronaut'] },
       { key: 'B', items: ['⚽ 1. Beach Ball', '🐢 2. Blastoise (Water Jets)', '🦋 3. Butterfly'] },

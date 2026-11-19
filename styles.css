@@ -1,5 +1,6 @@
 /* Baby Game Styles - Fullscreen Toddler Sensory Engine */
 
+/* Neon palette shared by the rules below (a few rules repeat the same hex values literally). */
 :root {
   --primary-pink: #ff2a6d;
   --electric-blue: #05d9e8;
@@ -8,6 +9,7 @@
   --deep-purple: #1f1147;
 }
 
+/* Toddler-proofing: no text selection or long-press callouts anywhere. */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -17,6 +19,7 @@
   -webkit-touch-callout: none;
 }
 
+/* Lock the page to the viewport: no scrolling, no touch panning or pinch gestures (touch-action: none). */
 html, body {
   width: 100vw;
   height: 100vh;
@@ -38,6 +41,7 @@ html, body {
 }
 
 /* Fullscreen Overlays for Drastic Visual Filters */
+/* Base for filter overlays: invisible by default (opacity 0) and click-through; the per-overlay rules below fade them in when active. */
 .overlay-layer {
   position: absolute;
   top: 0;
@@ -51,6 +55,7 @@ html, body {
 }
 
 /* CRT Scanline Filter */
+/* Scanlines: a 4px repeating dark line pattern plus a faint RGB tint. */
 #crt-overlay.active {
   opacity: 0.85;
   background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.45) 50%),
@@ -64,6 +69,7 @@ html, body {
   animation: discoFlicker 0.25s infinite alternate;
 }
 
+/* Cycles through five translucent colours; alternate makes it ping-pong. */
 @keyframes discoFlicker {
   0%   { background-color: rgba(255, 0, 128, 0.4); }
   25%  { background-color: rgba(0, 255, 255, 0.4); }
@@ -73,6 +79,7 @@ html, body {
 }
 
 /* Strobe Flash */
+/* White flash that fades out in 0.35s (effects.triggerFlash re-adds the class to restart it). */
 #strobe-overlay.flash {
   opacity: 1;
   background-color: #ffffff;
@@ -85,6 +92,7 @@ html, body {
 }
 
 /* Psychedelic Invert */
+/* Inverts and hue-rotates whatever is behind it using backdrop-filter, giving the psychedelic colour-invert. */
 #invert-overlay.active {
   opacity: 1;
   backdrop-filter: invert(100%) hue-rotate(180deg);
@@ -92,6 +100,7 @@ html, body {
 }
 
 /* Screen Shake (Gentle and Earthquake) */
+/* Shake classes applied to <body> by effects.triggerScreenShake(); the JS removes them after the animation time. */
 body.shake-gentle {
   animation: screenShakeGentle 0.25s cubic-bezier(.36,.07,.19,.97) both;
 }
@@ -115,6 +124,7 @@ body.shake-quake {
 }
 
 /* Big Splash Banner (Toddler Visual Center) */
+/* Centered banner; pointer-events none so it never blocks touches. Shown/hidden by toggling .hidden (scale + fade) from effects.showSplashBanner. */
 #splash-banner {
   position: absolute;
   top: 50%;
@@ -143,6 +153,7 @@ body.shake-quake {
   margin-bottom: 12px;
 }
 
+/* Huge outlined letter; sizes use clamp() so they scale with screen width within limits. */
 #splash-letter {
   font-family: 'Fredoka', 'Nunito', 'Segoe UI', Arial, sans-serif;
   font-size: clamp(6.5rem, 18vw, 15rem);
@@ -171,6 +182,7 @@ body.shake-quake {
   animation: bounceScale 0.4s ease-out;
 }
 
+/* Image and emoji slots are mutually exclusive; JS hides the unused one. */
 #splash-img.hidden {
   display: none;
 }
@@ -207,6 +219,7 @@ body.shake-quake {
 }
 
 /* Subtle, Toddler-Proof Top HUD */
+/* HUD sits above the canvas and, unlike the overlays, accepts pointer events so its buttons work. */
 #game-hud {
   position: absolute;
   top: 12px;
@@ -237,6 +250,7 @@ body.shake-quake {
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
+/* Active badge (e.g. Baby Shark playing) turns pink and pulses. */
 .badge.active {
   background: #ff2a6d;
   border-color: #ffec3d;
@@ -285,6 +299,7 @@ body.shake-quake {
 }
 
 /* Start Overlay (Audio Autoplay Policy unlocker) */
+/* Start screen covers everything (z-index 100). Removing .active fades it out and disables its pointer events. */
 .overlay-screen {
   position: absolute;
   top: 0;
@@ -381,6 +396,7 @@ body.shake-quake {
 }
 
 /* Mobile & Small Chromebook tweaks */
+/* Narrow screens: stack the HUD vertically and centre the buttons. */
 @media (max-width: 640px) {
   #game-hud {
     flex-direction: column;

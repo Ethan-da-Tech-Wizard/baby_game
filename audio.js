@@ -218,13 +218,16 @@ init() {
     osc.frequency.setValueAtTime(freq, now);
 
     // Warm wooden chime timbre
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0, now);
     gain.gain.linearRampToValueAtTime(0.4, now + 0.015);
     gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + dur + 0.05);
   }
@@ -240,12 +243,15 @@ init() {
     osc.frequency.setValueAtTime(freq, now);
     osc.frequency.exponentialRampToValueAtTime(freq * 0.85, now + dur);
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0.3, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + dur + 0.05);
   }
@@ -261,12 +267,15 @@ init() {
     osc.frequency.setValueAtTime(140, now);
     osc.frequency.exponentialRampToValueAtTime(45, now + 0.08);
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0.25, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + 0.09);
   }
@@ -293,14 +302,17 @@ init() {
     filter.frequency.setValueAtTime(380, now);
     filter.Q.value = 4;
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0, now);
     gain.gain.linearRampToValueAtTime(0.45, now + 0.2);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 1.2);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + 1.25);
   }
@@ -325,13 +337,16 @@ init() {
       filter.frequency.setValueAtTime(850, now);
       filter.Q.value = 5;
 
+      // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
       gain.gain.setValueAtTime(0.4, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
 
+      // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(this.masterGain);
 
+      // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
       osc.start(now);
       osc.stop(now + 0.19);
     }
@@ -352,12 +367,15 @@ init() {
       osc.frequency.setValueAtTime(280, now);
       osc.frequency.exponentialRampToValueAtTime(90, now + 0.14);
 
+      // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
       gain.gain.setValueAtTime(0.5, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
 
+      // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
       osc.connect(gain);
       gain.connect(this.masterGain);
 
+      // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
       osc.start(now);
       osc.stop(now + 0.15);
     }
@@ -382,14 +400,17 @@ init() {
     filter.frequency.setValueAtTime(1100, now);
     filter.Q.value = 3;
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0, now);
     gain.gain.linearRampToValueAtTime(0.35, now + 0.15);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.85);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + 0.9);
   }
@@ -416,13 +437,16 @@ init() {
     tremolo.connect(tremoloGain);
     tremoloGain.connect(gain.gain);
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0.3, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.95);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(gain);
     gain.connect(this.masterGain);
 
     tremolo.start(now);
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     tremolo.stop(now + 1.0);
     osc.stop(now + 1.0);
@@ -448,14 +472,17 @@ init() {
     filter.frequency.linearRampToValueAtTime(200, now + 1.4);
     filter.Q.value = 6;
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0, now);
     gain.gain.linearRampToValueAtTime(0.6, now + 0.3);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 1.4);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + 1.45);
   }
@@ -475,12 +502,15 @@ init() {
       osc.frequency.setValueAtTime(95, now);
       osc.frequency.exponentialRampToValueAtTime(60, now + 0.08);
 
+      // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
       gain.gain.setValueAtTime(0.4, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
 
+      // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
       osc.connect(gain);
       gain.connect(this.masterGain);
 
+      // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
       osc.start(now);
       osc.stop(now + 0.09);
     }
@@ -500,13 +530,16 @@ init() {
     osc.frequency.exponentialRampToValueAtTime(540, now + 0.25);
     osc.frequency.linearRampToValueAtTime(480, now + 0.85);
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0.1, now);
     gain.gain.linearRampToValueAtTime(0.45, now + 0.2);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.9);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + 0.95);
   }
@@ -527,12 +560,15 @@ init() {
       osc.frequency.linearRampToValueAtTime(3600, now + 0.04);
       osc.frequency.linearRampToValueAtTime(2200, now + 0.09);
 
+      // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
       gain.gain.setValueAtTime(0.25, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
 
+      // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
       osc.connect(gain);
       gain.connect(this.masterGain);
 
+      // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
       osc.start(now);
       osc.stop(now + 0.1);
     }
@@ -556,13 +592,16 @@ init() {
     filter.frequency.setValueAtTime(450, now);
     filter.Q.value = 8;
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0.6, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + 1.55);
   }
@@ -582,13 +621,16 @@ init() {
       osc.frequency.setValueAtTime(480, now);
       osc.frequency.exponentialRampToValueAtTime(420, now + 0.28);
 
+      // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
       gain.gain.setValueAtTime(0, now);
       gain.gain.linearRampToValueAtTime(0.35, now + 0.06);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
 
+      // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
       osc.connect(gain);
       gain.connect(this.masterGain);
 
+      // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
       osc.start(now);
       osc.stop(now + 0.3);
     }
@@ -612,12 +654,15 @@ init() {
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(pitch, now);
 
+      // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
       gain.gain.setValueAtTime(0.35, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + dur);
 
+      // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
       osc.connect(gain);
       gain.connect(this.masterGain);
 
+      // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
       osc.start(now);
       osc.stop(now + dur + 0.02);
       timeAcc += dur * 0.9;
@@ -640,12 +685,15 @@ init() {
     osc.frequency.setValueAtTime(150, now);
     osc.frequency.exponentialRampToValueAtTime(600, now + 0.35);
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0.4, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.38);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + 0.4);
   }
@@ -662,12 +710,15 @@ init() {
     osc.frequency.setValueAtTime(980, now);
     osc.frequency.exponentialRampToValueAtTime(60, now + 0.22);
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0.35, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + 0.23);
   }
@@ -684,12 +735,15 @@ init() {
     osc.frequency.setValueAtTime(120, now);
     osc.frequency.exponentialRampToValueAtTime(30, now + 0.6);
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0.7, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.65);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + 0.7);
   }
@@ -707,12 +761,15 @@ init() {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, now);
 
+      // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
       gain.gain.setValueAtTime(0.3, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
 
+      // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
       osc.connect(gain);
       gain.connect(this.masterGain);
 
+      // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
       osc.start(now);
       osc.stop(now + 0.45);
     });
@@ -731,12 +788,15 @@ init() {
       osc.type = 'square';
       osc.frequency.setValueAtTime(freq, now);
 
+      // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
       gain.gain.setValueAtTime(0.2, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
 
+      // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
       osc.connect(gain);
       gain.connect(this.masterGain);
 
+      // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
       osc.start(now);
       osc.stop(now + 0.18);
     });
@@ -754,12 +814,15 @@ init() {
     osc.frequency.setValueAtTime(370, now);
     osc.frequency.linearRampToValueAtTime(520, now + 0.3);
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0.4, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + 0.5);
   }
@@ -776,12 +839,15 @@ init() {
     osc.frequency.setValueAtTime(300, now);
     osc.frequency.exponentialRampToValueAtTime(1400, now + 0.4);
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0.3, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + 0.5);
   }
@@ -815,14 +881,17 @@ init() {
     filter.frequency.linearRampToValueAtTime(800, now + 0.8);
     filter.Q.value = 5;
 
+    // Volume envelope on the audio clock: an initial level, then a ramp to a near-silent 0.01 (exponential ramps cannot reach exactly 0).
     gain.gain.setValueAtTime(0.05, now);
     gain.gain.linearRampToValueAtTime(0.5, now + 0.3);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.85);
 
+    // Wire the graph: oscillator -> (filter) -> gain envelope -> master volume -> speakers.
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(this.masterGain);
 
+    // Start now and stop just after the envelope ends so the nodes can be garbage-collected.
     osc.start(now);
     osc.stop(now + 0.9);
   }

@@ -15,6 +15,8 @@ Last Modified: 11/08/2026
 Purpose: Automated voice recording and intelligent speech pause-detection pipeline
          for Baby Game, slicing 3-word vocabulary prompts into distinct WAV audio files.
 """
+# Standard library only. External requirements: the ffmpeg CLI (microphone capture and loudness
+# normalisation) and pw-play (PipeWire) for playback, so recording targets Linux/Chromebook.
 import os
 import sys
 import json
@@ -31,6 +33,12 @@ OUTPUT_DIR = os.path.join(SCRIPT_DIR, "audio", "dad")
 MANIFEST_PATH = os.path.join(OUTPUT_DIR, "manifest.json")
 
 ## 3-Word Prompts matching the 3-item cycling game engine
+# One entry per game key that has spoken words. Fields:
+#   key    - KeyboardEvent.code used by keys.js (and as the manifest key prefix)
+#   title  - label shown in the studio
+#   words  - the 3 words, in the same order as that key's cycling items in keys.js
+#   prompt - exact sentence to say: '<letter> is for... <w1>! <w2>! <w3>!'
+# The splitter relies on this order: the last three spoken chunks are word 1, 2 and 3.
 VOICE_ITEMS = [
     # Letters (A-Z) - Workflow: "[Letter] is for... [Word 1]... [Word 2]... [Word 3]"
     {"key": "KeyA", "title": "A", "words": ["Apple", "Aerodactyl", "Astronaut"], "prompt": "A is for... Apple! Aerodactyl! Astronaut!"},
@@ -59,6 +67,7 @@ VOICE_ITEMS = [
     {"key": "KeyX", "title": "X", "words": ["Xylophone", "X-Ray", "X Marks The Spot"], "prompt": "X is for... Xylophone! X-Ray! X Marks The Spot!"},
     {"key": "KeyY", "title": "Y", "words": ["Yak", "Yoyo", "Yacht"], "prompt": "Y is for... Yak! Yoyo! Yacht!"},
     {"key": "KeyZ", "title": "Z", "words": ["Zigzagoon", "Zebra", "Zap"], "prompt": "Z is for... Zigzagoon! Zebra! Zap!"},
+    # Number keys: number word, animal, animal sound.
     # Numbers (1-0) - Toddler Animal Phonics & Sounds
     {"key": "Digit1", "title": "1 (Dino)", "words": ["One", "Dino", "Roar"], "prompt": "1 is for... One! Dino! Roar!"},
     {"key": "Digit2", "title": "2 (Dogs)", "words": ["Two", "Dog", "Woof"], "prompt": "2 is for... Two! Dog! Woof!"},
@@ -70,6 +79,7 @@ VOICE_ITEMS = [
     {"key": "Digit8", "title": "8 (Sheep)", "words": ["Eight", "Sheep", "Baa"], "prompt": "8 is for... Eight! Sheep! Baa!"},
     {"key": "Digit9", "title": "9 (Elephants)", "words": ["Nine", "Elephant", "Trumpet"], "prompt": "9 is for... Nine! Elephant! Trumpet!"},
     {"key": "Digit0", "title": "10 (Birds)", "words": ["Ten", "Bird", "Chirp"], "prompt": "10 is for... Ten! Bird! Chirp!"},
+    # Space and Enter have their own three-item cycles in keys.js.
     # Specials
     {"key": "Space", "title": "Space", "words": ["Party", "Woohoo", "Celebrate"], "prompt": "Space is for... Party! Woohoo! Celebrate!"},
     {"key": "Enter", "title": "Enter", "words": ["Earthquake", "Boom", "Explosion"], "prompt": "Enter is for... Earthquake! Boom! Explosion!"}
@@ -77,9 +87,11 @@ VOICE_ITEMS = [
 
 
 def ensure_dirs():
+    """Create audio/dad (and parents) if it does not exist yet."""
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def load_manifest():
+    """Read manifest.json ({clip key: relative path}); a missing or corrupt file counts as empty."""
     if os.path.exists(MANIFEST_PATH):
         try:
             with open(MANIFEST_PATH, "r") as f:
@@ -89,6 +101,7 @@ def load_manifest():
     return {}
 
 def save_manifest(manifest):
+    """Write manifest.json (indented) mapping keys like 'KeyA_1' or 'KeyA_intro' to clip paths that audio.js fetches."""
     with open(MANIFEST_PATH, "w") as f:
         json.dump(manifest, f, indent=2)
 
@@ -154,9 +167,16 @@ def detect_speech_segments(wav_path):
     return segments, framerate, n_channels, sampwidth, samples
 
 def record_and_split(key, words, duration=4.0):
+    """Record `duration` seconds for one key, split the take into clips and update the manifest.
+
+    Writes audio/dad/<key>.wav (full take), and when segmentation succeeds <key>_intro.wav and
+    <key>_1..3.wav. Returns a list of (label, wav_path) for playback. Needs ffmpeg on PATH.
+    """
     ensure_dirs()
+    # Scratch file for the raw take; deleted at the end of the function.
     temp_wav = os.path.join(OUTPUT_DIR, f"{key}_full.wav")
 
+    # ffmpeg captures mono 44.1 kHz from the default PulseAudio source for `duration` seconds.
     # Record from microphone
     cmd = [
         "ffmpeg", "-y", "-loglevel", "error",
@@ -168,18 +188,25 @@ def record_and_split(key, words, duration=4.0):
     try:
         subprocess.run(cmd, check=True)
     except Exception:
+        # Fallback to ALSA when PulseAudio capture fails. NOTE for maintainers: index 4 of cmd is the '-f' flag itself
+        # (the format name 'pulse' is index 5), so this assignment replaces '-f' rather than the format;
+        # the fallback command is therefore malformed as written. Left unchanged (comment-only edit).
         cmd[4] = "alsa"
         subprocess.run(cmd, check=True)
 
+    # Find the spoken chunks in the raw take; samples are kept so slices can be cut without re-reading the file.
     # Detect spoken segments
     segments, framerate, n_channels, sampwidth, samples = detect_speech_segments(temp_wav)
     manifest = load_manifest()
 
+    # Keep the whole take, loudness-normalised, as the key-wide clip (used when no per-word clip exists).
     # Always save full take
     full_target = os.path.join(OUTPUT_DIR, f"{key}.wav")
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", temp_wav, "-af", "loudnorm", full_target], check=True)
     manifest[key] = f"audio/dad/{key}.wav"
 
+    # Cut samples[st:en] to its own mono WAV and normalise it with ffmpeg loudnorm via a temp file that
+    # replaces the original on success (if ffmpeg fails the un-normalised slice is kept).
     def save_slice(st, en, filename):
         chunk_samples = samples[st:en]
         raw_chunk = struct.pack(f"<{len(chunk_samples)}h", *chunk_samples)
@@ -197,6 +224,7 @@ def record_and_split(key, words, duration=4.0):
 
     split_files = []
 
+    # 4+ chunks: everything before the last three is merged into the '... is for' intro clip.
     # If 4 or more chunks: Segments before the last 3 form the intro ("A is for..."), last 3 are words!
     if len(segments) >= 4:
         intro_st = segments[0][0]
@@ -211,6 +239,7 @@ def record_and_split(key, words, duration=4.0):
             manifest[f"{key}_{idx}"] = f"audio/dad/{key}_{idx}.wav"
             split_files.append((words[idx-1], w_wav))
 
+    # Exactly 3 chunks: three words, no separate intro.
     elif len(segments) == 3:
         # 3 words without separate intro
         for idx, (st, en) in enumerate(segments, 1):
@@ -219,6 +248,8 @@ def record_and_split(key, words, duration=4.0):
             split_files.append((words[idx-1], w_wav))
 
     else:
+        # Anything else (too few or too many chunks): point all three variants at the full take so the game still
+        # has something to play, and report how many chunks were found so the user can redo it.
         # Fallback: assign full take or evenly split
         for idx in range(1, 4):
             manifest[f"{key}_{idx}"] = f"audio/dad/{key}.wav"
@@ -231,10 +262,14 @@ def record_and_split(key, words, duration=4.0):
     return split_files
 
 def play_file(path):
+    """Play a WAV through PipeWire (pw-play); missing files are skipped and errors are not raised (check=False)."""
     if os.path.exists(path):
         subprocess.run(["pw-play", path], check=False)
 
 def interactive_mode(default_dur=4.0, filter_items=None, start_key=None):
+    """Walk through items (default: all VOICE_ITEMS): prompt, record, play back each split and an intro+word-1
+    preview, then keep or redo. start_key resumes from a key; filter_items restricts the list. 'q' quits, 's' skips.
+    """
     print("=" * 68)
     print("🎙️  DAD'S VOICE STUDIO: '[LETTER] IS FOR...' 4-SECOND RECORDER  👶")
     print("=" * 68)
@@ -277,6 +312,7 @@ def interactive_mode(default_dur=4.0, filter_items=None, start_key=None):
                 play_file(w_path)
                 time.sleep(0.12)
 
+            # Preview the in-game combination: intro clip followed by word 1.
             # If intro exists, simulate the in-game combo!
             if any("Intro" in name for name, _ in splits) and len(splits) > 1:
                 print("      🔊 Toddler Game Phonics Combo: Intro + Word 1...")
@@ -297,6 +333,9 @@ def interactive_mode(default_dur=4.0, filter_items=None, start_key=None):
     print("\n🎉 All recordings saved and manifest updated at audio/dad/manifest.json!")
 
 def main():
+    """CLI entry. Actions in priority order: --clear (confirmed), --list, --key, --animals, --missing; otherwise the
+    full interactive session, optionally starting at --start.
+    """
     parser = argparse.ArgumentParser(description="Dad Voice Studio with 3-Word Auto-Splitter")
     parser.add_argument("--key", help="Record a specific key (e.g. KeyJ, KeyA, Space)")
     parser.add_argument("--start", help="Start recording from a specific key (e.g. KeyJ)")
@@ -357,6 +396,7 @@ def main():
             print(f"Unknown key: {args.key}")
         return
 
+    # Shortcut set: letter J plus the animal-noise number keys.
     if args.animals:
         # User requested: KeyJ followed by the Animal Noises (Digit1-Digit0)
         target_keys = ["KeyJ", "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9", "Digit0"]
@@ -364,6 +404,7 @@ def main():
         interactive_mode(default_dur=args.dur, filter_items=items)
         return
 
+    # Only keys with neither a key-wide nor a per-word entry in the manifest.
     if args.missing:
         manifest = load_manifest()
         items = [x for x in VOICE_ITEMS if (x["key"] not in manifest and f"{x['key']}_1" not in manifest)]

@@ -166,12 +166,15 @@ class EffectsEngine {
     const colors = ['#ff2a6d', '#05d9e8', '#ffec3d', '#00f076', '#a855f7', '#ff6b6b'];
     for (let i = 0; i < count; i++) {
       this.confetti.push({
+        // Spawn in a 200x100 box around screen centre (like a cannon), so the burst looks like it comes from one place.
         x: this.width * 0.5 + (Math.random() - 0.5) * 200,
         y: this.height * 0.5 + (Math.random() - 0.5) * 100,
+        // Velocities are pixels per frame (scaled by timeScale): horizontal +-14, vertical -5 to -30 (negative = up).
         vx: (Math.random() - 0.5) * 28,
         vy: -Math.random() * 25 - 5,
         size: Math.random() * 12 + 8,
         color: colors[Math.floor(Math.random() * colors.length)],
+        // Rotation and spin are in degrees; converted to radians when drawn.
         rotation: Math.random() * 360,
         spin: (Math.random() - 0.5) * 15,
         alpha: 1.0
@@ -189,6 +192,7 @@ class EffectsEngine {
     const hue = colors[Math.floor(Math.random() * colors.length)];
 
     for (let i = 0; i < 75; i++) {
+      // Uniform random direction and speed 3-17 px/frame gives a round burst.
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 14 + 3;
       this.fireworks.push({
@@ -199,6 +203,7 @@ class EffectsEngine {
         size: Math.random() * 4 + 2,
         color: hue,
         alpha: 1.0,
+        // Alpha lost per frame (0.012-0.032), so sparks fade at different times and the burst thins out naturally.
         decay: Math.random() * 0.02 + 0.012
       });
     }
@@ -216,6 +221,7 @@ class EffectsEngine {
     let curX = startX;
     let curY = 0;
 
+    // Random walk downward: each step drifts up to +-40px sideways and drops 20-80px, stopping at 85% of the height.
     while (curY < this.height * 0.85) {
       const nextX = curX + (Math.random() - 0.5) * 80;
       const nextY = curY + Math.random() * 60 + 20;
@@ -243,6 +249,7 @@ class EffectsEngine {
       vy: Math.random() * -10,
       radius: Math.random() * 35 + 30,
       color: colors[Math.floor(Math.random() * colors.length)],
+      // Fraction of vertical speed kept per bounce; < 1 so balls gradually settle.
       bounceFactor: 0.82
     });
   }
@@ -255,6 +262,7 @@ class EffectsEngine {
       y: y || this.height + 40,
       radius: Math.random() * 32 + 18,
       speedY: -(Math.random() * 2.5 + 1.2),
+      // wobbleOffset is advanced by wobbleSpeed each frame and fed to sin() to sway the bubble sideways.
       wobbleSpeed: Math.random() * 0.05 + 0.02,
       wobbleOffset: Math.random() * Math.PI * 2,
       alpha: 0.75
@@ -264,10 +272,12 @@ class EffectsEngine {
   // 6. Candy & Donut Rain
   // Falling food emojis spawned above the top edge (random head start so they do not arrive in one row).
   spawnCandyRain(count = 15) {
+    // Emoji pool for the falling candy/food; one is chosen per particle.
     const treats = ['🍩', '🍭', '🍬', '🍦', '🧁', '🍪', '🍎', '🍓', '🍌', '🍕'];
     for (let i = 0; i < count; i++) {
       this.candyRain.push({
         x: Math.random() * this.width,
+        // Start 50-200px above the screen so treats arrive staggered, not as a single row.
         y: -50 - Math.random() * 150,
         emoji: treats[Math.floor(Math.random() * treats.length)],
         speedY: Math.random() * 5 + 3,
@@ -287,6 +297,7 @@ class EffectsEngine {
         x: this.width * 0.5,
         y: this.height * 0.5,
         vx: (Math.random() - 0.5) * 22,
+        // Vertical velocity biased upward by 6 so emojis pop up before gravity pulls them down.
         vy: (Math.random() - 0.5) * 22 - 6,
         emoji: emojis[Math.floor(Math.random() * emojis.length)],
         size: Math.random() * 28 + 32,
@@ -409,8 +420,10 @@ class EffectsEngine {
   // Per-frame draw, back to front: backdrop, starfield, rainbow, matrix, rain, laser grid, Pokemon troupe,
   // particles, hearts. timeScale (0.3 under bullet time) slows motion; delta is computed but unused.
   renderLoop(timeNow) {
+    // Seconds since the previous frame (currently unused: motion is per-frame, not per-second, so speed varies with frame rate).
     const delta = (timeNow - this.lastTime) * 0.001;
     this.lastTime = timeNow;
+    // Slow-motion multiplier applied to every particle update.
     const timeScale = this.activeLayers.bulletTime ? 0.3 : 1.0;
 
     // Backdrop first (it repaints the whole canvas); fall back to a plain dark fill if anime.js failed to load.
@@ -502,10 +515,12 @@ class EffectsEngine {
   // position 'speed * 2' units further back to the current one.
   renderStarfield(timeScale) {
     this.ctx.save();
+    // Star projection origin is the screen centre.
     const cx = this.width * 0.5;
     const cy = this.height * 0.5;
     const speed = (this.activeLayers.galaxyWarp === 2 ? 38 : 12) * timeScale;
 
+    // Move each star toward the camera; perspective scale k = 400 / z makes near stars spread out faster.
     for (let s of this.stars) {
       s.z -= speed;
       if (s.z <= 0) {
@@ -519,6 +534,7 @@ class EffectsEngine {
       const py = s.y * k + cy;
 
       if (px >= 0 && px < this.width && py >= 0 && py < this.height) {
+        // Stars grow from 0.5px (far) to 4px (near).
         const rad = Math.max(0.5, (1 - s.z / 1000) * 4);
         this.ctx.beginPath();
         this.ctx.arc(px, py, rad, 0, Math.PI * 2);
@@ -618,6 +634,7 @@ class EffectsEngine {
   // bounces keep 82% (bounceFactor) of speed, walls 90%. Balls are never removed, only cleared by clearAllLayers.
   // Iterates backwards so array removals (none here) would be safe.
   updateAndDrawBouncingBalls(timeScale) {
+    // Gravity points up when reverse gravity is on (slightly weaker, -0.4 vs +0.45).
     const gravity = (this.activeLayers.reverseGravity ? -0.4 : 0.45) * timeScale;
     for (let i = this.bouncingBalls.length - 1; i >= 0; i--) {
       const b = this.bouncingBalls[i];
@@ -625,6 +642,7 @@ class EffectsEngine {
       b.x += b.vx * timeScale;
       b.y += b.vy * timeScale;
 
+      // Clamp the ball inside the screen and reflect its velocity so it never leaves the canvas.
       // Floor & Ceiling bounce
       if (b.y + b.radius >= this.height) {
         b.y = this.height - b.radius;
@@ -646,6 +664,7 @@ class EffectsEngine {
       this.ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
       this.ctx.fillStyle = b.color;
       this.ctx.shadowColor = b.color;
+      // Glow: shadowBlur is expensive in canvas, so it is only used for a few particle types.
       this.ctx.shadowBlur = 15;
       this.ctx.fill();
 
@@ -680,6 +699,7 @@ class EffectsEngine {
       const b = this.floatingBubbles[i];
       b.y += b.speedY * timeScale;
       b.wobbleOffset += b.wobbleSpeed;
+      // Sway +-12px around the bubble's base x.
       const curX = b.x + Math.sin(b.wobbleOffset) * 12;
 
       if (b.y < -50) {
@@ -738,6 +758,7 @@ class EffectsEngine {
       const c = this.confetti[i];
       c.x += c.vx * timeScale;
       c.y += c.vy * timeScale;
+      // Gravity added to vertical velocity each frame.
       c.vy += 0.45 * timeScale; // gravity
       c.rotation += c.spin * timeScale;
       c.alpha -= 0.007 * timeScale;
