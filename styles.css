@@ -1,6 +1,11 @@
+/* Stacking order (z-index) from back to front: 1 game canvas, 5 full-screen filter overlays, 10 splash banner, 20 HUD, 100 start overlay. */
+/* Keeping the order in one place matters: the banner must sit above the filters so the letter stays readable, and the start overlay must cover everything. */
+/* JS never sets styles for these layers directly; it only toggles classes (.active, .flash, .hidden, .shake-*), and this file defines what each class looks like. */
+
 /* Baby Game Styles - Fullscreen Toddler Sensory Engine */
 
 /* Neon palette shared by the rules below (a few rules repeat the same hex values literally). */
+/* Palette variables are the intended source of colour, but most rules below repeat the hex values literally (an older style); update both when changing a colour. */
 :root {
   --primary-pink: #ff2a6d;
   --electric-blue: #05d9e8;
@@ -10,6 +15,7 @@
 }
 
 /* Toddler-proofing: no text selection or long-press callouts anywhere. */
+/* Selection is disabled because a toddler dragging across the screen would otherwise highlight the HUD text and pop up copy menus. */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -20,6 +26,7 @@
 }
 
 /* Lock the page to the viewport: no scrolling, no touch panning or pinch gestures (touch-action: none). */
+/* 100vw/100vh with hidden overflow makes the page exactly one screen: any scrollbar would let a child scroll away from the game. */
 html, body {
   width: 100vw;
   height: 100vh;
@@ -30,6 +37,7 @@ html, body {
 }
 
 /* Primary Canvas */
+/* Absolutely positioned and sized to 100% so the canvas covers the viewport; its pixel size is set by JS (effects.js/anime.js) on resize, CSS only scales it. */
 #game-canvas {
   position: absolute;
   top: 0;
@@ -42,6 +50,7 @@ html, body {
 
 /* Fullscreen Overlays for Drastic Visual Filters */
 /* Base for filter overlays: invisible by default (opacity 0) and click-through; the per-overlay rules below fade them in when active. */
+/* z-index 5 puts these above the canvas but below the banner and HUD; pointer-events none lets taps pass through to the page underneath. */
 .overlay-layer {
   position: absolute;
   top: 0;
@@ -56,6 +65,7 @@ html, body {
 
 /* CRT Scanline Filter */
 /* Scanlines: a 4px repeating dark line pattern plus a faint RGB tint. */
+/* Two stacked gradients: horizontal dark bands every 4px give the scanline look, and a 6px-wide red/green/blue tint imitates CRT phosphor. */
 #crt-overlay.active {
   opacity: 0.85;
   background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.45) 50%),
@@ -64,12 +74,14 @@ html, body {
 }
 
 /* Disco Strobe */
+/* Low opacity (0.6) and colour alpha 0.4 keep the strobe visible without being harsh; the 0.25s alternate period sets the strobe speed. A parent who finds it too fast should lengthen it here. */
 #disco-overlay.active {
   opacity: 0.6;
   animation: discoFlicker 0.25s infinite alternate;
 }
 
 /* Cycles through five translucent colours; alternate makes it ping-pong. */
+/* Percentages are evenly spaced; with "alternate" the colours play forward then backward so there is no hard jump from the last colour to the first. */
 @keyframes discoFlicker {
   0%   { background-color: rgba(255, 0, 128, 0.4); }
   25%  { background-color: rgba(0, 255, 255, 0.4); }
@@ -86,6 +98,7 @@ html, body {
   animation: flashFade 0.35s ease-out forwards;
 }
 
+/* "forwards" in the rule above keeps the final opacity 0 after the animation ends, so the overlay stays invisible until the class is re-added. */
 @keyframes flashFade {
   0% { opacity: 0.95; }
   100% { opacity: 0; }
@@ -101,6 +114,7 @@ html, body {
 
 /* Screen Shake (Gentle and Earthquake) */
 /* Shake classes applied to <body> by effects.triggerScreenShake(); the JS removes them after the animation time. */
+/* Animations run on <body> so the whole scene moves together. Gentle (0.25s, a few px) is for ordinary key presses, quake (0.55s, larger offsets and tilt) for big moments. The cubic-bezier is the familiar "shake" easing. */
 body.shake-gentle {
   animation: screenShakeGentle 0.25s cubic-bezier(.36,.07,.19,.97) both;
 }
@@ -109,6 +123,7 @@ body.shake-quake {
   animation: screenShakeQuake 0.55s cubic-bezier(.36,.07,.19,.97) both;
 }
 
+/* Offsets alternate direction at irregular percentages so the motion feels random instead of a metronome. */
 @keyframes screenShakeGentle {
   10%, 90% { transform: translate3d(-3px, 2px, 0); }
   20%, 80% { transform: translate3d(4px, -3px, 0); }
@@ -125,6 +140,7 @@ body.shake-quake {
 
 /* Big Splash Banner (Toddler Visual Center) */
 /* Centered banner; pointer-events none so it never blocks touches. Shown/hidden by toggling .hidden (scale + fade) from effects.showSplashBanner. */
+/* Centred with top/left 50% plus translate(-50%, -50%). The transform includes scale because .hidden changes only the scale value; transitions then animate between the two states. */
 #splash-banner {
   position: absolute;
   top: 50%;
@@ -137,6 +153,8 @@ body.shake-quake {
   z-index: 10;
   pointer-events: none;
   opacity: 1;
+
+  /* The overshooting cubic-bezier (values above 1) makes the banner pop slightly past full size before settling; opacity fades slower (0.4s) so it lingers. */
   transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease-out;
 }
 
@@ -145,6 +163,7 @@ body.shake-quake {
   transform: translate(-50%, -50%) scale(0.2);
 }
 
+/* clamp(min, preferred, max) gap scales with the viewport width but never gets too small on a phone or too large on a TV. */
 #splash-top {
   display: flex;
   align-items: center;
@@ -159,6 +178,8 @@ body.shake-quake {
   font-size: clamp(6.5rem, 18vw, 15rem);
   font-weight: 900;
   color: #ffffff;
+
+  /* The dark outline plus the glow text-shadow keeps the white letter readable on top of every theme background, including bright ones. */
   -webkit-text-stroke: 8px #1e1b4b;
   text-shadow: 0 0 30px #ff2a6d, 0 0 50px #ffec3d, 0 16px 30px rgba(0,0,0,0.9);
   line-height: 1;
@@ -166,6 +187,7 @@ body.shake-quake {
   animation: bounceScale 0.4s ease-out;
 }
 
+/* Fixed square (clamped) so a Pokemon GIF and an emoji take the same space and the layout does not jump between them. */
 #splash-art {
   display: flex;
   align-items: center;
@@ -198,6 +220,7 @@ body.shake-quake {
   display: none;
 }
 
+/* Dark translucent pill with a white border so the word is readable on any background; uppercase because the words are spoken and shown as capitals for early readers. */
 #splash-word {
   font-family: 'Fredoka', 'Nunito', 'Segoe UI', Arial, sans-serif;
   font-size: clamp(2rem, 5vw, 4.2rem);
@@ -212,6 +235,7 @@ body.shake-quake {
   text-transform: uppercase;
 }
 
+/* Overshoots to 1.15 at 60% then settles at 1, with a small tilt; gives each new letter a "pop" to attract attention. */
 @keyframes bounceScale {
   0% { transform: scale(0.3) rotate(-10deg); }
   60% { transform: scale(1.15) rotate(5deg); }
@@ -220,6 +244,7 @@ body.shake-quake {
 
 /* Subtle, Toddler-Proof Top HUD */
 /* HUD sits above the canvas and, unlike the overlays, accepts pointer events so its buttons work. */
+/* Spans the top edge with 12px/14px margins; pointer-events auto re-enables clicks here even though most layers below ignore them. */
 #game-hud {
   position: absolute;
   top: 12px;
@@ -238,6 +263,7 @@ body.shake-quake {
   flex-wrap: wrap;
 }
 
+/* Badges are status displays (theme, Baby Shark, Pokemon), not buttons, so they have no hover style and no cursor change. */
 .badge {
   background: rgba(15, 15, 25, 0.75);
   backdrop-filter: blur(8px);
@@ -268,6 +294,7 @@ body.shake-quake {
   gap: 8px;
 }
 
+/* Large rounded targets are easy for a parent to hit; backdrop blur keeps them legible over moving scenes. */
 .hud-btn {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
@@ -289,6 +316,7 @@ body.shake-quake {
   transform: translateY(-2px);
 }
 
+/* Pink tint marks the clear-everything button as the destructive one. */
 .hud-btn.danger {
   background: rgba(255, 42, 109, 0.4);
 }
@@ -300,6 +328,7 @@ body.shake-quake {
 
 /* Start Overlay (Audio Autoplay Policy unlocker) */
 /* Start screen covers everything (z-index 100). Removing .active fades it out and disables its pointer events. */
+/* z-index 100 so the start screen sits above even the HUD. The click that dismisses it is also the user gesture browsers require before audio and fullscreen work. */
 .overlay-screen {
   position: absolute;
   top: 0;
@@ -314,11 +343,13 @@ body.shake-quake {
   transition: opacity 0.3s ease;
 }
 
+/* JS removes .active instead of hiding the node; this rule fades it and turns off pointer events so it can no longer swallow taps. */
 .overlay-screen:not(.active) {
   opacity: 0;
   pointer-events: none;
 }
 
+/* Card width is 90% up to 580px so it fits a phone and does not stretch on a desktop; the pink border and cyan inner glow match the game's neon palette. */
 .start-card {
   background: rgba(255, 255, 255, 0.08);
   border: 4px solid #ff2a6d;
@@ -332,6 +363,7 @@ body.shake-quake {
   color: #fff;
 }
 
+/* Infinite alternate animation makes a hop that returns smoothly, drawing a child's eye to the start button. */
 .mascot-bounce {
   font-size: 4rem;
   margin-bottom: 12px;
@@ -364,6 +396,7 @@ body.shake-quake {
   margin-bottom: 24px;
 }
 
+/* Large (1.5rem) button with a gradient: it is the single call to action on the screen. */
 .start-btn {
   background: linear-gradient(45deg, #ff2a6d, #ffec3d);
   color: #000;
@@ -382,6 +415,7 @@ body.shake-quake {
   box-shadow: 0 12px 35px rgba(255, 236, 61, 0.8);
 }
 
+/* Column flex with a small gap lists the parent-facing key hints under the button. */
 .quick-hints {
   margin-top: 24px;
   display: flex;
@@ -397,6 +431,7 @@ body.shake-quake {
 
 /* Mobile & Small Chromebook tweaks */
 /* Narrow screens: stack the HUD vertically and centre the buttons. */
+/* 640px is where the left badges and right buttons no longer fit on one row; below it the HUD stacks so nothing overflows. */
 @media (max-width: 640px) {
   #game-hud {
     flex-direction: column;
