@@ -100,6 +100,37 @@ class TestRecordDadEngine(unittest.TestCase):
         for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
             self.assertIn(f"Key{char}", keys, f"Missing key mapping for letter {char}")
 
+    def test_alsa_fallback_replaces_format_not_flag(self):
+        """When PulseAudio capture fails the retry must be `-f alsa -i default`.
+
+        Regression: the fallback used to assign cmd[4], which is the '-f' flag itself, producing
+        `alsa pulse -i ...` and a malformed ffmpeg command. We fake subprocess.run so the first
+        call (pulse) fails, the second (alsa) raises a sentinel to stop the function there, and
+        inspect both argv lists.
+        """
+        import subprocess
+        from unittest import mock
+
+        calls = []
+
+        def fake_run(cmd, **kwargs):
+            calls.append(list(cmd))
+            if len(calls) == 1:
+                raise subprocess.CalledProcessError(1, cmd)
+            raise RuntimeError("stop after fallback")
+
+        with mock.patch.object(record_dad, "ensure_dirs"), \
+                mock.patch.object(record_dad.subprocess, "run", side_effect=fake_run):
+            with self.assertRaises(RuntimeError):
+                record_dad.record_and_split("KeyA", ["Apple", "Aerodactyl", "Astronaut"])
+
+        self.assertEqual(len(calls), 2)
+        pulse_cmd, alsa_cmd = calls
+        self.assertEqual(pulse_cmd[pulse_cmd.index("-f") + 1], "pulse")
+        self.assertEqual(alsa_cmd[alsa_cmd.index("-f") + 1], "alsa")
+        # Everything except the format value must be identical between the two attempts.
+        self.assertEqual([a for a in pulse_cmd if a != "pulse"], [a for a in alsa_cmd if a != "alsa"])
+
 
 if __name__ == "__main__":
     unittest.main()

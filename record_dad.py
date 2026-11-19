@@ -166,6 +166,26 @@ def detect_speech_segments(wav_path):
 
     return segments, framerate, n_channels, sampwidth, samples
 
+def build_capture_cmd(fmt, duration, out_path):
+    """Build the ffmpeg command that records the default microphone to `out_path`.
+
+    Args:
+        fmt: ffmpeg input format name, "pulse" (PulseAudio) or "alsa".
+        duration: Seconds to record.
+        out_path: Destination WAV path (mono, 44.1 kHz).
+
+    Returns:
+        The argv list. The format name is the argument right after "-f".
+    """
+    return [
+        "ffmpeg", "-y", "-loglevel", "error",
+        "-f", fmt, "-i", "default",
+        "-t", str(duration),
+        "-ar", "44100", "-ac", "1",
+        out_path
+    ]
+
+
 def record_and_split(key, words, duration=4.0):
     """Record `duration` seconds for one key, split the take into clips and update the manifest.
 
@@ -178,21 +198,13 @@ def record_and_split(key, words, duration=4.0):
 
     # ffmpeg captures mono 44.1 kHz from the default PulseAudio source for `duration` seconds.
     # Record from microphone
-    cmd = [
-        "ffmpeg", "-y", "-loglevel", "error",
-        "-f", "pulse", "-i", "default",
-        "-t", str(duration),
-        "-ar", "44100", "-ac", "1",
-        temp_wav
-    ]
+    cmd = build_capture_cmd("pulse", duration, temp_wav)
     try:
         subprocess.run(cmd, check=True)
     except Exception:
-        # Fallback to ALSA when PulseAudio capture fails. NOTE for maintainers: index 4 of cmd is the '-f' flag itself
-        # (the format name 'pulse' is index 5), so this assignment replaces '-f' rather than the format;
-        # the fallback command is therefore malformed as written. Left unchanged (comment-only edit).
-        cmd[4] = "alsa"
-        subprocess.run(cmd, check=True)
+        # Fallback to ALSA when PulseAudio capture fails: same command with the capture format
+        # (the value after '-f') swapped, built by the helper so the right argument is replaced.
+        subprocess.run(build_capture_cmd("alsa", duration, temp_wav), check=True)
 
     # Find the spoken chunks in the raw take; samples are kept so slices can be cut without re-reading the file.
     # Detect spoken segments
