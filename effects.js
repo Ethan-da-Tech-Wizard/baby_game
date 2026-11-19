@@ -7,6 +7,10 @@
 //          geometry calculations, DOM canvas dimension management, and high-performance
 //          composite rendering operations.
 // ============================================================================== 
+// How this file fits: index.html loads it after audio.js and anime.js. keys.js calls the spawn*/toggle*/trigger* methods in response to input;
+// renderLoop() calls animeEngine.render (backdrop) and pokemonEngine.render (dancers) every frame, so this file decides the draw order of the whole scene.
+// It is published as window.effectsEngine. Known limit: motion is per-frame rather than per-second, so on a 120 Hz display particles move twice as fast as on 60 Hz.
+
 // EffectsEngine owns the full-screen <canvas id='game-canvas'> and a requestAnimationFrame loop.
 //
 // Two kinds of visuals live here:
@@ -18,6 +22,7 @@
 class EffectsEngine {
   // Grab the canvas/2D context, set up empty particle arrays and layer flags, then start the render loop.
   constructor() {
+    // Looked up once: the canvas element is permanent, so later code never repeats the DOM query on every frame.
     this.canvas = document.getElementById('game-canvas');
     this.ctx = this.canvas.getContext('2d');
     this.width = window.innerWidth;
@@ -53,6 +58,7 @@ class EffectsEngine {
 
     // Matrix Rain state
     // Matrix rain: one entry per 22px column holding that column's current row (negative = not yet on screen).
+    // Rebuilt in resize() because the number of columns depends on the screen width.
     this.matrixDrops = [];
 
     // Starfield state
@@ -82,6 +88,8 @@ class EffectsEngine {
     // Reinit matrix columns
     const columns = Math.floor(this.width / 22);
     this.matrixDrops = [];
+
+    // Start each column at a random negative row so the drops enter staggered instead of falling in a straight line.
     for (let i = 0; i < columns; i++) {
       this.matrixDrops[i] = Math.floor(Math.random() * -50);
     }
@@ -110,6 +118,8 @@ class EffectsEngine {
   triggerFlash() {
     const strobe = document.getElementById('strobe-overlay');
     strobe.classList.remove('flash');
+
+    // Reading a layout property forces the browser to apply the removed class first; without it, removing and re-adding in the same frame is optimised away and the animation does not restart.
     void strobe.offsetWidth; // trigger reflow
     strobe.classList.add('flash');
   }
@@ -154,6 +164,8 @@ class EffectsEngine {
     }
 
     banner.classList.remove('hidden');
+
+    // A quick second key press must cancel the first press's pending hide, or the new banner would vanish after the old timer fires.
     clearTimeout(this.bannerTimer);
     this.bannerTimer = setTimeout(() => {
       banner.classList.add('hidden');
@@ -222,6 +234,7 @@ class EffectsEngine {
     let curY = 0;
 
     // Random walk downward: each step drifts up to +-40px sideways and drops 20-80px, stopping at 85% of the height.
+    // 85% leaves the bolt ending above the bottom edge, which reads better than a bolt that is cut off by the screen.
     while (curY < this.height * 0.85) {
       const nextX = curX + (Math.random() - 0.5) * 80;
       const nextY = curY + Math.random() * 60 + 20;

@@ -7,6 +7,12 @@
 //          and GainNodes with ADSR envelopes to generate instruments, animal cries,
 //          cartoon sound effects, and SpeechSynthesis voice prompts without external files.
 // ============================================================================== 
+// How this file fits: index.html loads this first. It creates one SoundEngine and publishes it as window.audioEngine; keys.js, effects.js and anime.js
+// call its play* and speakWord methods, and nothing else in the app produces sound. It reads audio/dad/manifest.json (written by record_dad.py)
+// for optional recorded voice clips and falls back to the browser's speech synthesis when a clip is missing.
+// Design decision: no audio files are needed for sound effects, so the game works offline and the repository stays small.
+// Known limits: the AudioContext cannot start before a user gesture, so the first sound after page load comes only after the start overlay is tapped.
+
 // SoundEngine: every sound in the game is synthesised at runtime with the Web Audio API
 // (oscillator -> optional filter -> gain envelope -> masterGain -> speakers). The only audio
 // files are optional recorded voice clips described by audio/dad/manifest.json.
@@ -26,9 +32,17 @@ class SoundEngine {
     this.isMuted = false;
     this.babySharkRunning = false;
     this.babySharkStep = 0;
+
+    // Holds the pending setTimeout id so toggling the song off can cancel the next note.
     this.babySharkTimer = null;
+
+    // 0.6 is a moderate default so a first-time sound is not startling for a toddler or a parent in a quiet room.
     this.volumeLevel = 0.6;
+
+    // (Declared for completeness; no code in this file reads it.)
     this.speechUnlocked = false;
+
+    // Empty object (not null) so lookups like manifest[key] are always safe before the fetch completes.
     this.dadVoiceManifest = {};
     // Fetch the optional voice-clip manifest right away; failure is fine (speech synthesis is the fallback).
     this.loadDadManifest();
@@ -67,6 +81,8 @@ init() {
     this.ctx = new AudioContext();
     this.masterGain = this.ctx.createGain();
     this.masterGain.gain.setValueAtTime(this.volumeLevel, this.ctx.currentTime);
+
+    // Every sound connects to masterGain, so volume and mute are one-node changes instead of touching each sound.
     this.masterGain.connect(this.ctx.destination);
   }
 
@@ -84,6 +100,7 @@ init() {
   // Adjust volume by delta, clamped to 0.1-1.0 (never fully silent; use mute for that). Returns the
   // new level as an integer percent for the HUD. While muted the gain stays at 0.
   setVolume(delta) {
+    // Floor at 0.1 so the volume keys can never silently reach zero and make a parent think the game is broken.
     this.volumeLevel = Math.max(0.1, Math.min(1.0, this.volumeLevel + delta));
     if (this.masterGain && this.ctx) {
       this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.volumeLevel, this.ctx.currentTime);
@@ -132,6 +149,7 @@ init() {
   playBabySharkSequence() {
     if (!this.babySharkRunning || !this.ctx) return;
 
+    // Frequencies in Hz for equal temperament: D4 = 293.66 is the melody's tonic. G3/D3 are an octave below and form the bass line.
     // Pitch frequencies
     const D4 = 293.66;
     const E4 = 329.63;
@@ -185,6 +203,7 @@ init() {
       [0,   0.45, 0,  false] // Pause before loop
     ];
 
+    // Modulo wraps the step counter, so the song repeats forever until toggled off.
     const note = phrase[this.babySharkStep % phrase.length];
     const pitch = note[0];
     const dur = note[1];
@@ -200,6 +219,7 @@ init() {
       }
     }
 
+    // Next note is scheduled for exactly this note's duration, which keeps the tempo even. setTimeout drifts slightly, which is acceptable for a toddler song.
     this.babySharkStep++;
     this.babySharkTimer = setTimeout(() => {
       this.playBabySharkSequence();
@@ -288,6 +308,8 @@ init() {
   // Low sawtooth glide (125 -> 95 Hz) through a low-pass filter for a muffled 'moo'.
   playCowMoo() {
     this.ensureContext();
+
+    // Muted engines create no nodes at all, which saves CPU and means nothing is queued up that could play later when unmuted.
     if (this.isMuted) return;
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
@@ -322,6 +344,8 @@ init() {
   playDuckQuack() {
     this.ensureContext();
     if (this.isMuted) return;
+
+    // Two repeats offset by `delay` seconds on the audio clock (not setTimeout), so the quacks are sample-accurate.
     for (let i = 0; i < 2; i++) {
       const delay = i * 0.22;
       const now = this.ctx.currentTime + delay;
@@ -905,10 +929,12 @@ init() {
   //      then 55% of the time afterwards.
   //   3. Browser speech synthesis (playSpeechSynthFallback) if no clip exists or playback fails.
   // Any voice still playing is stopped first so words never overlap.
+  // `text` is what the child sees on the banner; keyCode and cycleIdx pick which recorded clip matches it (see manifest naming above).
   speakWord(text, keyCode, cycleIdx = 0) {
     if (this.isMuted) return;
 
     // Stop previous voice playback if still speaking
+    // Without stopping the previous clip, mashing keys would stack voices into noise; a toddler presses many keys per second.
     if (this.currentVoiceAudio) {
       try {
         this.currentVoiceAudio.pause();
@@ -919,6 +945,7 @@ init() {
 
     // Check if Dad's custom voice file is recorded for this specific cycle word or general key!
     // Specific per-variant clip first, then the key-wide clip.
+    // Manifest keys: KeyA_1 / KeyA_2 / KeyA_3 for the three words of a letter, KeyA for a single clip, KeyA_intro for "A is for...".
     const partKey = `${keyCode}_${cycleIdx + 1}`;
     const clipPath = (this.dadVoiceManifest && this.dadVoiceManifest[partKey]) ||
                      (this.dadVoiceManifest && this.dadVoiceManifest[keyCode]);
@@ -929,6 +956,8 @@ init() {
     // all variants (Apple, Aerodactyl, Astronaut) experience "the letter is for"
     // Lazily created record of which keys have already had their intro played.
     if (!this._letterIntroPlayed) this._letterIntroPlayed = {};
+
+    // The intro always plays on a key's first press, then only about half the time so repeated presses do not become tiresome.
     const shouldPlayIntro = !!introPath && (!this._letterIntroPlayed[keyCode] || Math.random() < 0.55);
     this._letterIntroPlayed[keyCode] = true;
 
@@ -940,6 +969,7 @@ init() {
           this.currentVoiceAudio = introAudio;
 
           // Chain: when the intro clip ends, play the word clip (errors ignored).
+          // Chained with onended rather than played together so the intro and the word never overlap.
           introAudio.onended = () => {
             try {
               const wordAudio = new Audio(clipPath);
@@ -949,6 +979,7 @@ init() {
             } catch (e) {}
           };
 
+          // play() rejects when autoplay is blocked or the file is missing; the word clip is tried directly, and if that also fails speech synthesis takes over.
           introAudio.play().catch(() => {
             // Fallback directly to the word clip
             const wordAudio = new Audio(clipPath);
@@ -962,6 +993,7 @@ init() {
           wordAudio.volume = this.volumeLevel;
           this.currentVoiceAudio = wordAudio;
           wordAudio.play().catch(() => {
+            // Reached when there is no clip, or setting one up threw: the child still hears the word.
             this.playSpeechSynthFallback(text, keyCode);
           });
           return;
@@ -977,12 +1009,14 @@ init() {
   // Speak with the browser's speech synthesis. Emojis are stripped so they are not read out. For letter
   // keys, 55% of the time the phrase becomes 'A is for APPLE', matching the clip behaviour above.
   playSpeechSynthFallback(text, keyCode) {
+    // Some embedded browsers lack speech synthesis; silently skipping is better than throwing inside a key handler.
     if (!('speechSynthesis' in window)) return;
     try {
       // Cancel anything queued so the new word is heard immediately.
       window.speechSynthesis.cancel(); // clear queue for instant responsiveness
       let phrase = text;
       // Strip emojis from text for clean speech synthesis
+      // The Unicode emoji property removes pictographs that synthesis would read as long names ("red apple"). The `u` flag is required for the property escape. Note: this class also matches digits, so a number in the text is stripped too.
       const cleanWord = text.replace(/[\p{Emoji}\u200d]+/gu, '').trim();
       if (keyCode && keyCode.startsWith('Key') && Math.random() < 0.55) {
         const letter = keyCode.slice(3);
