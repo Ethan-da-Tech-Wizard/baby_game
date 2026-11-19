@@ -6,6 +6,11 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
          Provides DOM controls for triggering procedural sound synthesis, testing
          speech synthesis voices, tuning particle physics, and inspecting audio manifests.
 ============================================================================== -->
+
+<!-- File role: a parent-facing helper page, opened from the Studio button in index.html. It is not part of the toddler game loop and loads none of the game scripts. -->
+<!-- It shows the Pokemon artwork, how many of Dad's voice clips exist (audio/dad/manifest.json, written by record_dad.py), and a sample of the key cycles. -->
+<!-- Self-contained: styles and script are inline so the page works from a service-worker cache with no extra requests. No network is needed except the optional web fonts. -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,7 +22,10 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;900&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
   <!-- Page-local styles (this page does not use styles.css). Layout is a two-column grid that collapses to one column under 900px. -->
+  <!-- Panel styling system: one dark gradient page, translucent "glass" panels (.panel), and three accent colours from :root. Everything below is scoped to this page only. -->
   <style>
+
+    /* Same neon palette as styles.css but with different variable names; this page does not import styles.css. */
     :root {
       --primary: #ff2a6d;
       --secondary: #05d9e8;
@@ -26,6 +34,7 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
       --card-bg: rgba(255, 255, 255, 0.06);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* min-height (not height) lets the page grow and scroll, unlike the game page which is locked to one screen. */
     body {
       background: radial-gradient(circle at top, #1e1145, #080314);
       color: #fff;
@@ -57,6 +66,8 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
       transition: transform 0.2s;
     }
     .back-btn:hover { transform: scale(1.05); }
+
+    /* Two equal columns for the first two panels; the third panel spans both with grid-column 1 / -1 (inline style below). */
     .studio-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -80,6 +91,7 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
     }
     /* Roster cards */
     /* Pokemon Roster */
+    /* auto-fill with minmax(130px, 1fr) fits as many cards per row as the width allows, so no media query is needed for this grid. */
     .poke-showcase {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -110,6 +122,7 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
       text-transform: capitalize;
     }
     /* Key Inspector */
+    /* Capped height (480px) with its own scrollbar so a long list of keys does not push the page down. */
     .key-cycle-list {
       display: flex;
       flex-direction: column;
@@ -126,6 +139,8 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
       border-radius: 12px;
       gap: 14px;
     }
+
+    /* min-width keeps single letters and longer keys such as Enter aligned in the same column. */
     .key-badge {
       background: var(--primary);
       color: #fff;
@@ -173,6 +188,8 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
       transition: all 0.2s;
     }
     .rec-btn:hover { transform: scale(1.05); }
+
+    /* Class is toggled when a recording is in progress; the pulse animation signals that the mic is live. (Not toggled by any script on this page at present: recording happens in the terminal via record_dad.py.) */
     .rec-btn.recording {
       animation: pulse 1s infinite alternate;
       background: #dc2626;
@@ -193,6 +210,8 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
   </style>
 </head>
 <body>
+
+  <!-- Page header: title on the left, link back to the game on the right. -->
   <header>
     <div>
       <h1>🎨 Baby Game Animation & Voice Studio</h1>
@@ -203,10 +222,14 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
 
   <!-- Three panels: sprite preview, voice studio status, and a read-only sample of the key cycles. -->
   <main class="studio-grid">
+
+    <!-- Panel 1 is filled by renderPokemon() in the script below, which writes into the empty #poke-grid. -->
     <!-- Panel 1: Official Pokemon & Sprites -->
     <section class="panel">
       <h2>✨ Official Pokémon Roster (Artwork & Animated Sprites)</h2>
       <div style="margin-bottom: 16px; display: flex; gap: 10px;">
+
+        <!-- Inline styles are used because this one button has no shared class; the button switches the grid between PNG artwork and animated GIFs. -->
         <button id="toggle-ani" style="padding: 6px 14px; border-radius: 20px; background: var(--secondary); border: none; font-weight: bold; cursor: pointer;">Toggle Animated GIFs</button>
       </div>
       <div class="poke-showcase" id="poke-grid"></div>
@@ -216,10 +239,14 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
     <section class="panel">
       <h2>🎙️ Dad's Voice Studio</h2>
       <div class="voice-status">
+
+        <!-- Text is replaced by the fetch of manifest.json below; the placeholder shows until the request finishes. -->
         <span id="voice-count-badge" style="background: var(--primary); padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">Checking recordings...</span>
       </div>
       <div class="mic-record-box">
         <p style="margin-bottom: 12px;">Record directly via terminal CLI for highest studio quality:</p>
+
+        <!-- Recording is done in the terminal, not in the browser, because the script gives better audio quality and writes the manifest the game reads. &amp;&amp; is the escaped form of the shell operator. The path shown is an example and must be adjusted to where the project lives. -->
         <div class="cmd-hint">cd /home/user/pg/baby_game &amp;&amp; python3 record_dad.py</div>
         <p style="margin-top: 14px; font-size: 0.9rem; color: #94a3b8;">
           ✨ Instant redo supported! Press [r] right after listening to record again anytime.
@@ -232,6 +259,8 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
     <section class="panel" style="grid-column: 1 / -1;">
       <h2>🔤 3-Item Cycling Keymap (Press each key to see all 3!)</h2>
       <p style="margin-bottom: 14px; color: #cbd5e1;">Every physical Chromebook key cycles through 3 totally distinct fun things with their own visuals, sounds, and Pokémon artwork:</p>
+
+      <!-- Filled by the SAMPLES loop at the bottom of the script. -->
       <div class="key-cycle-list" id="cycle-list"></div>
     </section>
   </main>
@@ -240,6 +269,8 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
        1. DOM Element Selection: Binds UI buttons, sliders, and canvases to studio controller.
        2. Audio Preview Triggering: Directly invokes Web Audio API synthesizers and voice playback.
        3. Real-Time Feedback: Updates DOM display cards dynamically based on active audio presets. -->
+
+<!-- All studio logic lives in this one inline script; it starts running as the page loads, so the elements above already exist. -->
 <script>
     // Roster shown in panel 1; file is the base name under images/pokemon/ (NAME.png artwork, NAME_ani.gif animation).
     const POKEMON_DATA = [
@@ -256,15 +287,19 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
     ];
 
     // Toggle state: PNG artwork vs animated GIFs.
+    // Starts on PNG artwork because still images load instantly, while the animated GIFs are large.
     let showAnimated = false;
     const grid = document.getElementById('poke-grid');
 
     // Rebuild the roster grid from POKEMON_DATA using the current artwork/animation mode.
     function renderPokemon() {
+      // Cleared and rebuilt on every toggle; with only ten cards this is simpler than updating images in place.
       grid.innerHTML = '';
       POKEMON_DATA.forEach(p => {
         const card = document.createElement('div');
         card.className = 'poke-card';
+
+        // Naming convention in images/pokemon: NAME.png for artwork and NAME_ani.gif for the animation.
         const ext = showAnimated ? '_ani.gif' : '.png';
         card.innerHTML = `
           <img src="images/pokemon/${p.file}${ext}" alt="${p.name}">
@@ -274,9 +309,12 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
       });
     }
 
+    // Updates the button label to name the mode the NEXT click will switch to, then redraws the grid.
     document.getElementById('toggle-ani').addEventListener('click', () => {
       showAnimated = !showAnimated;
       document.getElementById('toggle-ani').innerText = showAnimated ? 'Show Artwork PNG' : 'Show Animated GIFs';
+
+      // First draw on page load (PNG mode).
       renderPokemon();
     });
 
@@ -284,6 +322,7 @@ Purpose: Interactive animation and voice recording studio interface for Baby Gam
 
     // Count the entries in audio/dad/manifest.json. The 38 is hard-coded: 26 letters + 10 digits + Space + Enter, matching VOICE_ITEMS in record_dad.py. Note the manifest also holds per-word and intro entries, so its raw entry count can exceed 38.
     // Check Dad's voice manifest
+    // A missing manifest (no recordings yet, or the file is not served) lands in the catch below and shows 0 instead of an error.
     fetch('audio/dad/manifest.json')
       .then(res => res.json())
       .then(manifest => {
