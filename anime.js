@@ -1,3 +1,5 @@
+// Chibi roster: every character below is drawn with the same three helpers for a consistent kawaii face
+// (big sparkly eyes, blush, smile).
 // ==============================================================================
 // Program: anime.js
 // Programmer: Ethan-da-Tech-Wizard
@@ -7,7 +9,16 @@
 //          physics simulation, procedural SVG/canvas path rasterization, and
 //          toddler-safe thematic background state transitions.
 // ============================================================================== 
+// AnimeBackdropEngine paints the animated full-screen background. Exactly one of four themes is
+// active at a time; effects.js calls render() at the start of every frame, and each theme method
+// fills the whole canvas, so everything drawn afterwards sits on top of it.
+//
+// All motion is driven by this.time, which grows 0.04 per rendered frame (frame-rate dependent,
+// not wall-clock based).
 class AnimeBackdropEngine {
+  // themes is the cycle order for nextTheme(); themeNames are the HUD labels. particles feed the DBZ theme,
+  // leaves feed the Naruto theme. auraIntensity and steamPuffs are initialised here but not read by any
+  // render method at present.
   constructor() {
     this.themes = ['dbz', 'naruto', 'luffy', 'pokemon'];
     this.themeNames = {
@@ -24,23 +35,28 @@ class AnimeBackdropEngine {
     this.time = 0;
 
     // Init theme particle pools
+    // Build the particle pools for the starting theme.
     this.initParticles();
   }
 
+  // Key of the active theme ('dbz' | 'naruto' | 'luffy' | 'pokemon').
   getCurrentTheme() {
     return this.themes[this.currentThemeIndex];
   }
 
+  // Human-readable HUD label of the active theme.
   getThemeName() {
     return this.themeNames[this.getCurrentTheme()];
   }
 
+  // Advance to the next theme (wrapping), rebuild particles, and return the new label.
   nextTheme() {
     this.currentThemeIndex = (this.currentThemeIndex + 1) % this.themes.length;
     this.initParticles();
     return this.getThemeName();
   }
 
+  // Jump to a named theme; unknown names are ignored. Used by keys that map to a specific show.
   setTheme(name) {
     const idx = this.themes.indexOf(name);
     if (idx !== -1) {
@@ -49,6 +65,8 @@ class AnimeBackdropEngine {
     }
   }
 
+  // (Re)seed the two particle pools at random screen positions. Called on every theme change so the new
+  // theme starts with fresh positions. Uses window size, since the canvas is full-screen.
   initParticles() {
     this.particles = [];
     this.leaves = [];
@@ -80,6 +98,7 @@ class AnimeBackdropEngine {
     }
   }
 
+  // Entry point called every frame: advance the animation clock and delegate to the active theme.
   render(ctx, width, height) {
     this.time += 0.04;
     const theme = this.getCurrentTheme();
@@ -101,6 +120,9 @@ class AnimeBackdropEngine {
   }
 
   // 1. DBZ Super Saiyan Ki Aura Backdrop
+  // Dragon Ball style: purple-to-red gradient sky, dark jagged ridge, a pulsing golden radial 'ki' aura
+  // (radius oscillates with sin(time*4)), gold sparks rising and drifting sideways, and an occasional
+  // (25% of frames) cyan electric zigzag.
   renderDBZTheme(ctx, width, height) {
     // Deep starry cosmic gradient
     const grad = ctx.createLinearGradient(0, 0, 0, height);
@@ -178,6 +200,10 @@ class AnimeBackdropEngine {
   }
 
   // 2. Naruto Ninja Dash & Swirling Rasengan
+  // Naruto style: night forest gradient, horizontal 'speed lines' whose length pulses, a swarm of green
+  // leaves blowing right-to-left (wrapping to the right edge), and a rotating cyan Rasengan vortex with six
+  // curved chakra strands. Note the strands are drawn with cumulative ctx.rotate calls inside one
+  // save/restore pair.
   renderNarutoTheme(ctx, width, height) {
     // Night Leaf Village Bamboo Forest
     const grad = ctx.createLinearGradient(0, 0, 0, height);
@@ -256,6 +282,9 @@ class AnimeBackdropEngine {
   }
 
   // 3. Luffy Gear Rubber Sprint & Action Vapor
+  // One Piece style: orange-to-gold sunset over a blue ocean strip with animated foam dashes, radial
+  // white zoom lines (only angles where a sine wave is high are drawn, so they flicker), and a trail of
+  // semi-transparent white steam circles.
   renderLuffyTheme(ctx, width, height) {
     // High energy tropical sunset & ocean sprint
     const grad = ctx.createLinearGradient(0, 0, 0, height);
@@ -309,6 +338,8 @@ class AnimeBackdropEngine {
   }
 
   // 4. Pokémon Island Adventure
+  // Pokemon island scene: sky gradient, a sun with 12 slowly rotating rays, four clouds drifting right
+  // (wrapped with modulo), then two layers of green hills built from quadratic curves.
   renderPokemonIslandTheme(ctx, width, height) {
     // Cheerful Blue Sky with Sunburst
     const grad = ctx.createLinearGradient(0, 0, 0, height);
@@ -378,7 +409,15 @@ class AnimeBackdropEngine {
  * Dancing Pokémon Troupe Manager
  * Renders high-quality animated cartoon pocket monsters dancing in sync!
  */
+// PokemonTroupeManager draws the dancing Pokemon overlay. All characters are hand-drawn with canvas path
+// calls (no image assets) and share one signature: draw*(ctx, x, y, bounce, wiggle), where (x, y) is the
+// ground position, bounce (0..1) lifts the character and wiggle (-1..1) sways it sideways.
+//
+// Intensity (toggled by the P key via keys.js):
+//   0 off | 1 Kanto starters + Pikachu | 2 big Pokemon | 3 babies | 4 everyone plus disco beams.
 class PokemonTroupeManager {
+  // intensity selects the squad (see class comment). activeSummon/summonTimer belong to the single-Pokemon
+  // spotlight API (summon / renderSpecificPokemon) which render() does not currently call.
   constructor() {
     this.intensity = 0; // 0 = Off, 1 = Kanto Titans, 2 = Kaiju & Dinosaurs, 3 = Early Route & Baby, 4 = MEGA ALL-POKEMON STAMPEDE!
     this.maxIntensity = 4;
@@ -389,12 +428,15 @@ class PokemonTroupeManager {
     this.summonTimer = null;
   }
 
+  // Cycle intensity 0 -> 4 and back to 0 (modulo maxIntensity + 1); clears any single-Pokemon summon.
+  // Returns the new intensity (keys.js treats >0 as 'on').
   toggle() {
     this.activeSummon = null;
     this.intensity = (this.intensity + 1) % (this.maxIntensity + 1);
     return this.intensity;
   }
 
+  // Spotlight one Pokemon by name for 12 seconds (timer resets on repeat calls). Not referenced by render().
   summon(name) {
     this.activeSummon = name;
     if (this.summonTimer) clearTimeout(this.summonTimer);
@@ -404,6 +446,7 @@ class PokemonTroupeManager {
     }, 12000);
   }
 
+  // HUD/banner title for the current intensity, with a generic fallback.
   getSquadName() {
     const names = [
       'OFF',
@@ -415,6 +458,10 @@ class PokemonTroupeManager {
     return names[this.intensity] || 'Pokémon Dance Party';
   }
 
+  // Per-frame draw of the troupe. A shared beat drives everyone: bounceBeat = |sin(t*3.5)| (always >= 0, so
+  // it bounces), sideWiggle = sin(t*3.5). Squads are layered with intensity checks (squad N runs at
+  // intensity N or 4); positions differ at intensity 4 so all ten fit on screen. Flyers (Aerodactyl,
+  // Starly) are placed high in the sky instead of on the ground.
   render(ctx, width, height) {
     if (this.intensity === 0) return;
 
@@ -460,6 +507,8 @@ class PokemonTroupeManager {
     }
   }
 
+  // Draw one named Pokemon (case-insensitive), defaulting to Pikachu. Flyers get a vertical offset so a ground
+  // position can be passed for any name. Currently unused by render().
   renderSpecificPokemon(ctx, name, x, y, bounce, wiggle) {
     switch (name.toLowerCase()) {
       case 'charizard':
@@ -496,6 +545,7 @@ class PokemonTroupeManager {
   }
 
   // 🐹 Pikachu (Electric Mouse)
+  // Pikachu. Note: render() passes a sixth argument (pScale) that this method does not declare, so it is ignored.
   drawPikachu(ctx, x, y, bounce, wiggle) {
     ctx.save();
     ctx.translate(x + wiggle * 10, y - bounce * 35);
@@ -605,6 +655,7 @@ class PokemonTroupeManager {
   }
 
   // 🔥 Charmander (Fire Dragon)
+  // Charmander (older drawing style, not part of the cute-chibi roster below). Not called by render().
   drawCharmander(ctx, x, y, bounce, wiggle) {
     ctx.save();
     ctx.translate(x + wiggle * 10, y - bounce * 30);
@@ -683,6 +734,7 @@ class PokemonTroupeManager {
   }
 
   // 🐢 Squirtle (Water Turtle with Cool Sunglasses)
+  // Squirtle (older drawing style). Not called by render().
   drawSquirtle(ctx, x, y, bounce, wiggle) {
     ctx.save();
     ctx.translate(x + wiggle * 8, y - bounce * 28);
@@ -760,6 +812,7 @@ class PokemonTroupeManager {
   }
 
   // 🎤 Jigglypuff (Singing Pink Balloon)
+  // Jigglypuff (older drawing style). Not called by render().
   drawJigglypuff(ctx, x, y, bounce, wiggle) {
     ctx.save();
     const floatY = y + Math.sin(this.time * 3) * 20;
@@ -844,6 +897,8 @@ class PokemonTroupeManager {
   // ========================================================
 
   // Helper: Draw Big Sparkling Kawaii Anime Eyes
+  // Eyes at two x positions: dark pupil, large highlight at upper-left, small twinkle at lower-right.
+  // Coordinates are relative to the character's translated origin.
   drawCuteAnimeEyes(ctx, leftX, rightX, y, radius = 7) {
     ctx.save();
     // Dark round pupils
@@ -869,6 +924,7 @@ class PokemonTroupeManager {
   }
 
   // Helper: Rosy Pink Blush Cheeks
+  // Two translucent pink ellipses for blush.
   drawRosyCheeks(ctx, leftX, rightX, y, radiusX = 9, radiusY = 5) {
     ctx.save();
     ctx.fillStyle = 'rgba(255, 99, 132, 0.65)';
@@ -880,6 +936,7 @@ class PokemonTroupeManager {
   }
 
   // Helper: Cute Happy Open Smile
+  // Open lower-half-circle mouth with a small tongue below it.
   drawHappySmile(ctx, x, y, width = 12) {
     ctx.save();
     ctx.fillStyle = '#be123c';
@@ -895,6 +952,8 @@ class PokemonTroupeManager {
   }
 
   // 1. 🔥 CHIBI CHARIZARD (Chubby Orange Baby Dragon Plushie)
+  // Pattern used by every draw method below: save, translate to the animated position (wiggle moves x,
+  // bounce lifts y), draw back-to-front body parts, face helpers, then restore so transforms never leak.
   drawCharizard(ctx, x, y, bounce, wiggle) {
     ctx.save();
     ctx.translate(x + wiggle * 8, y - bounce * 32);
@@ -1000,6 +1059,7 @@ class PokemonTroupeManager {
   }
 
   // 2. 🐢 CHIBI BLASTOISE (Chubby Baby Blue Turtle with Bubble Cannons)
+  // Blastoise as a chubby blue turtle with bubble cannons.
   drawBlastoise(ctx, x, y, bounce, wiggle) {
     ctx.save();
     ctx.translate(x + wiggle * 8, y - bounce * 28);
@@ -1072,6 +1132,7 @@ class PokemonTroupeManager {
   }
 
   // 3. 🌺 CHIBI VENUSAUR (Cute Turquoise Baby Dino with Giant Daisy)
+  // Venusaur as a turquoise baby dino with a giant daisy.
   drawVenusaur(ctx, x, y, bounce, wiggle) {
     ctx.save();
     ctx.translate(x + wiggle * 6, y - bounce * 25);
@@ -1148,6 +1209,7 @@ class PokemonTroupeManager {
   }
 
   // 4. 🦘 CHIBI KANGASKHAN (Sweet Mama & Giggling Baby in Pouch)
+  // Kangaskhan mama with a baby in her pouch.
   drawKangaskhan(ctx, x, y, bounce, wiggle) {
     ctx.save();
     ctx.translate(x + wiggle * 8, y - bounce * 28);
@@ -1225,6 +1287,7 @@ class PokemonTroupeManager {
   }
 
   // 5. 👑 CHIBI NIDOKING (Sweet Purple Baby Dino-Rhino Plushie)
+  // Nidoking as a purple baby dino-rhino.
   drawNidoking(ctx, x, y, bounce, wiggle) {
     ctx.save();
     ctx.translate(x + wiggle * 8, y - bounce * 30);
@@ -1292,6 +1355,7 @@ class PokemonTroupeManager {
   }
 
   // 6. 🦖 CHIBI AERODACTYL (Cute Flying Cartoon Bird-Dragon)
+  // Aerodactyl (a flyer: render() passes a sky-high y).
   drawAerodactyl(ctx, x, y, bounce, wiggle) {
     ctx.save();
     const flightY = y + Math.sin(this.time * 4) * 18;
@@ -1356,6 +1420,7 @@ class PokemonTroupeManager {
   }
 
   // 7. 🦝 CHIBI ZIGZAGOON (Fluffy Puppy-Raccoon Plushie)
+  // Zigzagoon as a fluffy puppy-raccoon.
   drawZigzagoon(ctx, x, y, bounce, wiggle) {
     ctx.save();
     const zigOffset = Math.sin(this.time * 6) * 18;
@@ -1412,6 +1477,7 @@ class PokemonTroupeManager {
   }
 
   // 8. 🐦 CHIBI STARLY (Adorable Round Puff Bird)
+  // Starly as a round puff bird (a flyer: placed at 45% of screen height).
   drawStarly(ctx, x, y, bounce, wiggle) {
     ctx.save();
     const flyY = y + Math.sin(this.time * 5) * 16;
@@ -1471,6 +1537,7 @@ class PokemonTroupeManager {
   }
 
   // 9. 🐣 CHIBI TOGEPI (Smiling Eggshell Baby)
+  // Togepi as a smiling eggshell baby.
   drawTogepi(ctx, x, y, bounce, wiggle) {
     ctx.save();
     ctx.translate(x + wiggle * 8, y - bounce * 26);
@@ -1540,6 +1607,8 @@ class PokemonTroupeManager {
   }
 
   // Rave Disco Beams (Intensity 4)
+  // Five translucent coloured beams fanning down from top centre; each swings with its own sine phase.
+  // Only drawn at intensity 4.
   renderRaveDiscoBeams(ctx, width, height) {
     ctx.save();
     const colors = ['#f43f5e', '#a855f7', '#06b6d4', '#eab308', '#22c55e'];
@@ -1558,5 +1627,6 @@ class PokemonTroupeManager {
 }
 
 // Global Instances
+// Both singletons are read through window by effects.js (backdrop and troupe render calls) and keys.js.
 window.animeEngine = new AnimeBackdropEngine();
 window.pokemonEngine = new PokemonTroupeManager();

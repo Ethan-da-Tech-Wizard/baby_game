@@ -7,20 +7,30 @@
 //          intercepts dangerous browser navigation shortcuts via event.preventDefault(),
 //          and routes sensory triggers to audio and visual particle subsystems.
 // ============================================================================== 
+// Wrapped in an IIFE so helpers and state stay private and nothing leaks onto window.
 (() => {
+  // Engines are created by audio.js / effects.js / anime.js, which index.html loads BEFORE this file.
   const audio = window.audioEngine;
   const effects = window.effectsEngine;
   const anime = window.animeEngine;
   const pokemon = window.pokemonEngine;
 
   // Track key press state for smooth hold/repeat prevention
+  // Reserved set for tracking held keys. (Not read anywhere in this file at present.)
   const activeKeys = new Set();
 
   // Track cycling states for each key (cycles 3 fun items per key!)
+  // Per-key-code counter: which of a key's three items to show next. Persists for the page lifetime.
   const cycleState = {};
 
   // 3-Item Cycling Vocabulary Map for Toddler Learning (A-Z)
   // Each press cycles to a new fun object, official Pokémon, animal, or vehicle!
+  // Letter keys. Each entry is a list of exactly three items that successive presses cycle through:
+  //   letter/word - text shown by the splash banner and spoken by audio.speakWord
+  //   emoji / img - emoji OR a Pokemon image path (the unused one is null)
+  //   sound()     - sound-effect call on the audio engine
+  //   fx()        - visual effect call on the effects engine
+  // Keyed by KeyboardEvent.code so it is layout independent.
   const vocabMap = {
     KeyA: [
       { letter: 'A', word: 'APPLE 🍎', emoji: '🍎', img: null, sound: () => audio.playBoing(), fx: () => effects.spawnBouncingBall() },
@@ -87,6 +97,7 @@
       { letter: 'M', word: 'MOON 🌙', emoji: '🌙', img: null, sound: () => audio.playOwlHoot(), fx: () => effects.cycleGalaxyWarp() },
       { letter: 'M', word: 'MUSIC 🎵', emoji: '🎵', img: null, sound: () => audio.playLevelUp(), fx: () => effects.toggleDiscoStrobe() }
     ],
+    // Some items also switch the anime theme and refresh the HUD badge (theme-badge).
     KeyN: [
       { letter: 'N', word: 'NIDOKING 👑', emoji: null, img: 'images/pokemon/nidoking.png', sound: () => audio.playDinoRoar(), fx: () => effects.triggerScreenShake(true) },
       { letter: 'N', word: 'NINJA 🥷', emoji: '🥷', img: null, sound: () => audio.playSaiyanAuraSound(), fx: () => { anime.setTheme('naruto'); updateThemeBadge(); } },
@@ -97,6 +108,7 @@
       { letter: 'O', word: 'OCTOPUS 🐙', emoji: '🐙', img: null, sound: () => audio.playDuckQuack(), fx: () => effects.cycleRainStorm() },
       { letter: 'O', word: 'ORANGE 🍊', emoji: '🍊', img: null, sound: () => audio.playBoing(), fx: () => effects.spawnBouncingBall() }
     ],
+    // Third P item toggles the Pokemon dance mode; the gif path is not in the service-worker ASSETS list.
     KeyP: [
       { letter: 'P', word: 'PIKACHU ⚡', emoji: null, img: 'images/pokemon/pikachu.png', sound: () => audio.playLevelUp(), fx: () => effects.spawnLightningBolt() },
       { letter: 'P', word: 'PUPPY 🐶', emoji: '🐶', img: null, sound: () => audio.playDogBark(), fx: () => effects.spawnEmojiBurst(20) },
@@ -117,6 +129,7 @@
       { letter: 'S', word: 'SUN ☀️', emoji: '☀️', img: null, sound: () => audio.playRooster(), fx: () => effects.triggerFlash() },
       { letter: 'S', word: 'SUPER SAIYAN ⚡', emoji: '⚡', img: null, sound: () => audio.playSaiyanAuraSound(), fx: () => { anime.setTheme('dbz'); updateThemeBadge(); } }
     ],
+    // First T item is Baby Shark: its song is the sound, so sound() is a no-op.
     KeyT: [
       { letter: 'T', word: 'BABY SHARK 🦈', emoji: '🦈', img: null, sound: () => {}, fx: () => toggleSharkSong() },
       { letter: 'T', word: 'TRAIN 🚂', emoji: '🚂', img: null, sound: () => audio.playPartyHorn(), fx: () => effects.spawnConfetti(250) },
@@ -155,6 +168,7 @@
   };
 
   // Numbers 1-0 Map with Emojis (3-item cycling with Dad Voice & animal phonics)
+  // Digit keys 1-0 use the same cycling scheme as vocabMap but with num/name fields (animal phonics). Digit0 shows '10'.
   const numberMap = {
     Digit1: [
       { num: '1', name: 'ONE DINO 🦖', emoji: '🦖', sound: () => audio.playDinoRoar(), fx: () => effects.spawnBouncingBall() },
@@ -209,11 +223,13 @@
   };
 
   // Update HUD Badges
+  // Refresh the HUD badge text from the anime engine's current theme name.
   function updateThemeBadge() {
     const badge = document.getElementById('theme-badge');
     badge.innerText = anime.getThemeName();
   }
 
+  // Toggle the Baby Shark song: update the HUD badge/active class and show a banner when switching on.
   function toggleSharkSong() {
     const isPlaying = audio.toggleBabyShark();
     const badge = document.getElementById('shark-badge');
@@ -225,6 +241,7 @@
     }
   }
 
+  // Toggle Pokemon dance mode. pokemon.toggle() returns an intensity; >0 means on (badge activated, banner and fireworks).
   function togglePokemonDance() {
     const intensity = pokemon.toggle();
     const badge = document.getElementById('poke-badge');
@@ -238,6 +255,7 @@
     }
   }
 
+  // Enter or exit fullscreen. Browsers may refuse without a user gesture, so rejections are ignored.
   function toggleFullscreen() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
@@ -247,10 +265,15 @@
   }
 
   // Master Key Down Handler
+  // Master keydown handler. Order: unlock audio, block browser shortcuts, then dispatch to letters, numbers,
+  // and finally the special-key switch. Every press ends in some visible and audible reaction.
   function handleKeyDown(e) {
+    // Browsers only allow audio after a user gesture; resume/create the AudioContext on every input.
     audio.ensureContext();
 
     // Prevent Chromebook / browser navigation triggers that disrupt play
+    // Keys whose default browser behaviour (navigate back, refresh, tab focus, scroll, page find...) would
+    // interrupt a child's play. Matched against both e.code and e.key.
     const interceptedCodes = [
       'Backspace', 'Tab', 'Space', 'Slash', 'AltLeft', 'AltRight',
       'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'BrowserBack',
@@ -263,6 +286,7 @@
     const code = e.code;
     const key = e.key;
 
+    // Take the next item for this key (round-robin through its list) and fire banner, voice, sound, effect, flash.
     // 1. Letters A - Z (Cycles through 3 distinct items per key!)
     if (vocabMap[code]) {
       const list = vocabMap[code];
@@ -278,6 +302,7 @@
       return;
     }
 
+    // Same flow as letters, using numberMap.
     // 2. Numbers 1 - 0 (Cycles through 3 distinct animal items per number!)
     if (numberMap[code]) {
       const list = numberMap[code];
@@ -293,6 +318,7 @@
       return;
     }
 
+    // Special keys. Chromebook top-row keys arrive as Browser*/Brightness*/AudioVolume* codes.
     // 3. Chromebook Top Row & Media Function Keys
     switch (code) {
       case 'Escape':
@@ -319,6 +345,7 @@
         effects.showSplashBanner('🌊', 'WATER WAVE!');
         break;
 
+      // F4/F5 are the Chromebook fullscreen and overview keys, mapped to fullscreen and disco mode.
       case 'F4': // Chromebook Fullscreen
         toggleFullscreen();
         audio.playLevelUp();
@@ -384,6 +411,7 @@
         effects.showSplashBanner('💥', 'POP!');
         break;
 
+      // Tab cycles to the next anime theme.
       case 'Tab': // Next Anime Theme!
         const newTheme = anime.nextTheme();
         updateThemeBadge();
@@ -410,6 +438,7 @@
         effects.showSplashBanner('🌀', 'COLOR INVERT!');
         break;
 
+      // Enter and Space cycle a small inline list of three celebratory reactions using their own cycleState entry.
       case 'Enter': {
         const enterList = [
           { word: 'EARTHQUAKE 💥', emoji: '💥', fx: () => { effects.triggerScreenShake(true); audio.playBoom(); } },
@@ -450,6 +479,7 @@
         effects.showSplashBanner('💫', 'LASER SWEEP!');
         break;
 
+      // Control toggles reverse gravity for the floating objects.
       case 'ControlLeft':
       case 'ControlRight':
         const rev = effects.toggleReverseGravity();
@@ -503,6 +533,7 @@
         effects.showSplashBanner('🎁', 'SURPRISE GIFT!');
         break;
 
+      // Arrow keys push the existing bouncing balls (vx/vy are mutated in place) or start rain.
       case 'ArrowLeft':
         effects.bouncingBalls.forEach(b => b.vx -= 15);
         audio.playLaser();
@@ -527,6 +558,7 @@
         effects.showSplashBanner('⬇️', 'RAIN DOWN!');
         break;
 
+      // Any key not listed (e.g. function keys) still rewards the child; the banner shows the key itself.
       default:
         // Generic fallback for any unexpected key
         effects.spawnFireworks();
@@ -538,6 +570,7 @@
   }
 
   // Pointer & Touch Event Handlers (for Touchscreen Chromebooks)
+  // Pointer/touch input: fireworks and a bouncing ball at the touch point (screen centre if no coordinates).
   function handleScreenTouch(e) {
     audio.ensureContext();
     const x = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : window.innerWidth * 0.5);
@@ -549,9 +582,11 @@
   }
 
   // Start Overlay Dismissal
+  // Start overlay: a click is required anyway to unlock audio and allow fullscreen.
   const startOverlay = document.getElementById('start-overlay');
   const btnStart = document.getElementById('btn-start');
 
+  // Hide the overlay, celebrate, and go fullscreen (the click counts as the required user gesture).
   function dismissStartModal() {
     audio.ensureContext();
     startOverlay.classList.remove('active');
@@ -563,6 +598,7 @@
   btnStart.addEventListener('click', dismissStartModal);
   startOverlay.addEventListener('click', dismissStartModal);
 
+  // HUD buttons run the same actions as the matching keys.
   // HUD Button Bindings
   document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
   document.getElementById('btn-shark').addEventListener('click', toggleSharkSong);
@@ -580,6 +616,7 @@
   });
 
   // Global Event Listeners
+  // Global listeners. Pointer events on the HUD or overlay are ignored so buttons do not also spawn effects.
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('pointerdown', (e) => {
     // If user clicked inside HUD buttons, don't trigger canvas splash
@@ -587,6 +624,7 @@
     handleScreenTouch(e);
   });
 
+  // Ask the browser to confirm before the tab is closed or reloaded (guards against toddler key mashing).
   // Prevent accidental back navigation / reload
   window.addEventListener('beforeunload', (e) => {
     e.preventDefault();
