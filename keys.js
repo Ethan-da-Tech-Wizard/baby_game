@@ -7,9 +7,16 @@
 //          intercepts dangerous browser navigation shortcuts via event.preventDefault(),
 //          and routes sensory triggers to audio and visual particle subsystems.
 // ============================================================================== 
+// How this file fits: index.html loads audio.js, effects.js, anime.js and then this file last, so the three engines already exist on window.
+// This file owns ALL input: keyboard, pointer/touch, the start overlay and the HUD buttons. It holds no drawing or sound code itself; each
+// input is translated into calls on audioEngine (sounds, speech), effectsEngine (particles, banners) and animeEngine (themes).
+// Design goal: a toddler cannot break anything. Every key reacts, dangerous browser shortcuts are blocked, and unknown keys get a default reward.
+// Known limits: some OS-level shortcuts (for example Ctrl+W, Alt+F4) cannot be stopped from a web page; beforeunload below is the only guard for those.
+
 // Wrapped in an IIFE so helpers and state stay private and nothing leaks onto window.
 (() => {
   // Engines are created by audio.js / effects.js / anime.js, which index.html loads BEFORE this file.
+  // If a script failed to load these are undefined and every handler would throw on first use; there is deliberately no fallback because the page is useless without them.
   const audio = window.audioEngine;
   const effects = window.effectsEngine;
   const anime = window.animeEngine;
@@ -21,6 +28,7 @@
 
   // Track cycling states for each key (cycles 3 fun items per key!)
   // Per-key-code counter: which of a key's three items to show next. Persists for the page lifetime.
+  // Keyed by KeyboardEvent.code, so the same physical key keeps its own position even if the keyboard layout changes.
   const cycleState = {};
 
   // 3-Item Cycling Vocabulary Map for Toddler Learning (A-Z)
@@ -31,6 +39,7 @@
   //   sound()     - sound-effect call on the audio engine
   //   fx()        - visual effect call on the effects engine
   // Keyed by KeyboardEvent.code so it is layout independent.
+  // Three items per letter is a design choice for repetition: a child pressing A repeatedly meets three different A-words instead of one.
   const vocabMap = {
     KeyA: [
       { letter: 'A', word: 'APPLE 🍎', emoji: '🍎', img: null, sound: () => audio.playBoing(), fx: () => effects.spawnBouncingBall() },
@@ -169,6 +178,7 @@
 
   // Numbers 1-0 Map with Emojis (3-item cycling with Dad Voice & animal phonics)
   // Digit keys 1-0 use the same cycling scheme as vocabMap but with num/name fields (animal phonics). Digit0 shows '10'.
+  // Same shape as vocabMap but the words are animals counted by the digit, which teaches number words and animal sounds together.
   const numberMap = {
     Digit1: [
       { num: '1', name: 'ONE DINO 🦖', emoji: '🦖', sound: () => audio.playDinoRoar(), fx: () => effects.spawnBouncingBall() },
@@ -224,12 +234,14 @@
 
   // Update HUD Badges
   // Refresh the HUD badge text from the anime engine's current theme name.
+  // Called after every theme change so the HUD never shows a stale theme name.
   function updateThemeBadge() {
     const badge = document.getElementById('theme-badge');
     badge.innerText = anime.getThemeName();
   }
 
   // Toggle the Baby Shark song: update the HUD badge/active class and show a banner when switching on.
+  // The song is a toggle (not a one-shot) because it is long; the badge text doubles as the on/off indicator for the parent.
   function toggleSharkSong() {
     const isPlaying = audio.toggleBabyShark();
     const badge = document.getElementById('shark-badge');
@@ -256,6 +268,7 @@
   }
 
   // Enter or exit fullscreen. Browsers may refuse without a user gesture, so rejections are ignored.
+  // Fullscreen hides the browser chrome, which removes the address bar and tabs a child could tap by accident.
   function toggleFullscreen() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
@@ -269,16 +282,20 @@
   // and finally the special-key switch. Every press ends in some visible and audible reaction.
   function handleKeyDown(e) {
     // Browsers only allow audio after a user gesture; resume/create the AudioContext on every input.
+    // Must be the first line of the handler: browsers only create or resume an AudioContext inside a user gesture, and a key press is one.
     audio.ensureContext();
 
     // Prevent Chromebook / browser navigation triggers that disrupt play
     // Keys whose default browser behaviour (navigate back, refresh, tab focus, scroll, page find...) would
     // interrupt a child's play. Matched against both e.code and e.key.
+    // Both e.code and e.key are checked below because Chromebook top-row keys report different values in the two fields.
     const interceptedCodes = [
       'Backspace', 'Tab', 'Space', 'Slash', 'AltLeft', 'AltRight',
       'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'BrowserBack',
       'BrowserForward', 'BrowserRefresh', 'F4', 'F5'
     ];
+
+    // preventDefault stops Backspace-as-back, Tab focus jumps, Space page scroll and the F-key actions; the key still reaches the switch below.
     if (interceptedCodes.includes(e.code) || interceptedCodes.includes(e.key)) {
       e.preventDefault();
     }
@@ -288,22 +305,31 @@
 
     // Take the next item for this key (round-robin through its list) and fire banner, voice, sound, effect, flash.
     // 1. Letters A - Z (Cycles through 3 distinct items per key!)
+    // Letters and digits return early after reacting, so they never fall through into the special-key switch.
     if (vocabMap[code]) {
       const list = vocabMap[code];
+
+      // Missing entry means first press, so start at item 0.
       const curIdx = cycleState[code] || 0;
       const item = list[curIdx % list.length];
+
+      // Advance after reading so the next press shows the next item; the modulo wraps three back to zero.
       cycleState[code] = (curIdx + 1) % list.length;
 
+      // Visual banner, spoken word, sound effect and particle effect all fire for one press, so a child gets feedback in several senses at once.
       effects.showSplashBanner(item.letter, item.word, item.img, item.emoji);
       audio.speakWord(item.word, code, curIdx % list.length);
       item.sound();
       item.fx();
+
+      // A short white flash confirms the press even when the other effects are subtle or the sound is muted.
       effects.triggerFlash();
       return;
     }
 
     // Same flow as letters, using numberMap.
     // 2. Numbers 1 - 0 (Cycles through 3 distinct animal items per number!)
+    // Numbers need their own branch because their data uses num/name instead of letter/word.
     if (numberMap[code]) {
       const list = numberMap[code];
       const curIdx = cycleState[code] || 0;
@@ -320,6 +346,7 @@
 
     // Special keys. Chromebook top-row keys arrive as Browser*/Brightness*/AudioVolume* codes.
     // 3. Chromebook Top Row & Media Function Keys
+    // Switch on e.code (physical key). Cases below are grouped: Chromebook top row, punctuation, modifiers, arrows. Each case pairs one effect with one sound and one banner so they are easy to tell apart.
     switch (code) {
       case 'Escape':
         effects.clearAllLayers();
@@ -327,6 +354,7 @@
         effects.showSplashBanner('🧹', 'ALL CLEAN!');
         break;
 
+      // Top-row Back/Forward/Refresh keys are repurposed because a real back or refresh would leave the game.
       case 'BrowserBack':
         effects.toggleCRTScanlines();
         audio.playLaser();
@@ -358,6 +386,7 @@
         effects.showSplashBanner('🪩', 'DISCO PARTY!');
         break;
 
+      // Brightness keys do not change the screen (the page cannot); they are given themed reactions instead.
       case 'BrightnessDown':
         audio.playOwlHoot();
         effects.showSplashBanner('🌙', 'NIGHT SKY!');
@@ -369,6 +398,7 @@
         effects.showSplashBanner('☀️', 'SUNSHINE!');
         break;
 
+      // The only keys that touch real state: mute and volume go through audio so the HUD and the engine agree.
       case 'AudioVolumeMute':
         const muted = audio.toggleMute();
         effects.showSplashBanner(muted ? '🔇' : '🔊', muted ? 'MUTED' : 'UNMUTED');
@@ -387,6 +417,7 @@
         break;
 
       // 4. Chromebook Navigation & Punctuation Keys
+      // Punctuation keys get unique effects so they do not all feel the same.
       case 'Backquote': // ` ~
         effects.cycleMatrixRain();
         audio.playLaser();
@@ -439,6 +470,7 @@
         break;
 
       // Enter and Space cycle a small inline list of three celebratory reactions using their own cycleState entry.
+      // Braces give the const declarations inside their own scope, since switch cases otherwise share one scope.
       case 'Enter': {
         const enterList = [
           { word: 'EARTHQUAKE 💥', emoji: '💥', fx: () => { effects.triggerScreenShake(true); audio.playBoom(); } },
@@ -472,6 +504,7 @@
         break;
       }
 
+      // Left and right modifier keys share a case so both sides behave the same.
       case 'ShiftLeft':
       case 'ShiftRight':
         effects.spawnLaserBeam();
@@ -494,6 +527,7 @@
         effects.showSplashBanner('🌈', 'PSYCHEDELIC!');
         break;
 
+      // CapsLock is grouped here because it is another large key a child hits by accident.
       case 'MetaLeft': // Chromebook Search / Everything Key
       case 'MetaRight':
       case 'CapsLock':
@@ -559,6 +593,7 @@
         break;
 
       // Any key not listed (e.g. function keys) still rewards the child; the banner shows the key itself.
+      // Reached for any code with no case (numpad, F-keys, media keys on other keyboards); nothing is ever ignored.
       default:
         // Generic fallback for any unexpected key
         effects.spawnFireworks();
@@ -571,8 +606,11 @@
 
   // Pointer & Touch Event Handlers (for Touchscreen Chromebooks)
   // Pointer/touch input: fireworks and a bouncing ball at the touch point (screen centre if no coordinates).
+  // Pointer events cover mouse, touch and pen, so one handler serves a Chromebook touchscreen and a laptop trackpad.
   function handleScreenTouch(e) {
     audio.ensureContext();
+
+    // Falls back to touches[0] or screen centre when no coordinates exist; note a clientX of exactly 0 is falsy and also falls back to the centre.
     const x = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : window.innerWidth * 0.5);
     const y = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : window.innerHeight * 0.5);
 
@@ -583,6 +621,7 @@
 
   // Start Overlay Dismissal
   // Start overlay: a click is required anyway to unlock audio and allow fullscreen.
+  // The overlay is the first screen: its click is what grants the audio and fullscreen permissions the rest of the game needs.
   const startOverlay = document.getElementById('start-overlay');
   const btnStart = document.getElementById('btn-start');
 
@@ -595,11 +634,13 @@
     toggleFullscreen();
   }
 
+  // Both the button and the whole overlay dismiss, because a toddler will tap anywhere.
   btnStart.addEventListener('click', dismissStartModal);
   startOverlay.addEventListener('click', dismissStartModal);
 
   // HUD buttons run the same actions as the matching keys.
   // HUD Button Bindings
+  // Parents use these buttons; each calls the same function as the matching keyboard shortcut so behaviour cannot diverge.
   document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
   document.getElementById('btn-shark').addEventListener('click', toggleSharkSong);
   document.getElementById('btn-poke').addEventListener('click', togglePokemonDance);
@@ -617,15 +658,18 @@
 
   // Global Event Listeners
   // Global listeners. Pointer events on the HUD or overlay are ignored so buttons do not also spawn effects.
+  // Attached to window (not a canvas) so keys work regardless of what element has focus.
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('pointerdown', (e) => {
     // If user clicked inside HUD buttons, don't trigger canvas splash
+    // Without this, pressing a HUD button would also spawn fireworks under the button.
     if (e.target.closest('#game-hud') || e.target.closest('#start-overlay')) return;
     handleScreenTouch(e);
   });
 
   // Ask the browser to confirm before the tab is closed or reloaded (guards against toddler key mashing).
   // Prevent accidental back navigation / reload
+  // Browsers show a generic "leave site?" prompt; the empty returnValue is what triggers it. Wording cannot be customised.
   window.addEventListener('beforeunload', (e) => {
     e.preventDefault();
     e.returnValue = '';
